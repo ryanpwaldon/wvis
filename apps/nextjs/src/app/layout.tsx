@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from 'next'
+import { cn } from '@sctv/ui'
+import { ThemeProvider, ThemeToggle } from '@sctv/ui/theme'
+import { Toaster } from '@sctv/ui/toast'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
-
-import { cn } from '@acme/ui'
-import { ThemeProvider, ThemeToggle } from '@acme/ui/theme'
-import { Toaster } from '@acme/ui/toast'
 
 import { TRPCReactProvider } from '~/trpc/react'
 

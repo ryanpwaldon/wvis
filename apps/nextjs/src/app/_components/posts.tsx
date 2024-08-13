@@ -1,12 +1,12 @@
 'use client'
 
-import type { RouterOutputs } from '@acme/api'
-import { CreatePostSchema } from '@acme/db/schema'
-import { cn } from '@acme/ui'
-import { Button } from '@acme/ui/button'
-import { Form, FormControl, FormField, FormItem, FormMessage, useForm } from '@acme/ui/form'
-import { Input } from '@acme/ui/input'
-import { toast } from '@acme/ui/toast'
+import type { RouterOutputs } from '@sctv/api'
+import { CreatePostSchema } from '@sctv/db/schema'
+import { cn } from '@sctv/ui'
+import { Button } from '@sctv/ui/button'
+import { Form, FormControl, FormField, FormItem, FormMessage, useForm } from '@sctv/ui/form'
+import { Input } from '@sctv/ui/input'
+import { toast } from '@sctv/ui/toast'
 
 import { api } from '~/trpc/react'
 

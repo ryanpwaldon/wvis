@@ -1,10 +1,9 @@
 import type { DefaultSession, NextAuthConfig, Session as NextAuthSession } from 'next-auth'
 import { skipCSRFCheck } from '@auth/core'
 import { DrizzleAdapter } from '@auth/drizzle-adapter'
+import { db } from '@sctv/db/client'
+import { Account, Session, User } from '@sctv/db/schema'
 import Discord from 'next-auth/providers/discord'
-
-import { db } from '@acme/db/client'
-import { Account, Session, User } from '@acme/db/schema'
 
 import { env } from '../env'
 
