@@ -562,7 +562,7 @@ importers:
         version: 7.35.0(eslint@9.7.0)
       eslint-plugin-react-hooks:
         specifier: rc
-        version: 5.1.0-rc-e948a5ac-20240807(eslint@9.7.0)
+        version: 5.1.0-rc-68dbd84b-20240812(eslint@9.7.0)
       eslint-plugin-turbo:
         specifier: ^2.0.8
         version: 2.0.8(eslint@9.7.0)
@@ -4556,8 +4556,8 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
 
-  eslint-plugin-react-hooks@5.1.0-rc-e948a5ac-20240807:
-    resolution: {integrity: sha512-cc94nzLi7ZC4ZetSaA5z5bH5o1dYBxfPckudUT3Ddn1d5WXTk9Cn1NpM+HE+OZ5zrmbq/oBLxovfllOm0P9KXg==}
+  eslint-plugin-react-hooks@5.1.0-rc-68dbd84b-20240812:
+    resolution: {integrity: sha512-4TYlNy88XzkL2JYCIHjQv+sJ7tQuqkRNeTp0py78arVCVXK4I8MA/Z3DffxH5KSeC7PcagmBnVHww7tEpbToZA==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -5219,7 +5219,6 @@ packages:
 
   inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
-    deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
@@ -6440,7 +6439,6 @@ packages:
 
   osenv@0.1.5:
     resolution: {integrity: sha512-0CWcCECdMVc2Rw3U5w9ZjqX6ga6ubk1xDVKxtBQPK7wis/0F2r9T6k4ydGYhecl7YUBxBVxhL5oisPsNxAPe2g==}
-    deprecated: This package is no longer supported.
 
   p-finally@1.0.0:
     resolution: {integrity: sha512-LICb2p9CB7FS+0eR1oqWnHhp0FljGLZCWBE9aix0Uye9W8LTQPwMTYVGWQWIw9RdQiDg4+epXQODwIYJtSJaow==}
@@ -12899,7 +12897,7 @@ snapshots:
       safe-regex-test: 1.0.3
       string.prototype.includes: 2.0.0
 
-  eslint-plugin-react-hooks@5.1.0-rc-e948a5ac-20240807(eslint@9.7.0):
+  eslint-plugin-react-hooks@5.1.0-rc-68dbd84b-20240812(eslint@9.7.0):
     dependencies:
       eslint: 9.7.0
 
