@@ -20,6 +20,7 @@ const defaultOptions: Partial<Omit<MapOptions, 'container'>> = {
   center: [-74.5, 40],
   style: mapboxStyle as StyleSpecification,
   attributionControl: false,
+  projection: { name: 'mercator' },
 }
 
 const useMap = ({ mapContainerRef, options }: UseMapProps) => {
@@ -37,10 +38,6 @@ const useMap = ({ mapContainerRef, options }: UseMapProps) => {
       mapInstance.on('load', () => {
         setMap(mapInstance)
       })
-    }
-
-    return () => {
-      if (map?.remove) map.remove()
     }
   }, [mapContainerRef, map, options])
 

@@ -10,11 +10,11 @@ export const Mapbox = () => {
     mapContainerRef,
     options: {
       center: [-74.5, 40],
-      zoom: 9,
+      zoom: 2,
     },
   })
   return (
-    <div className="relative h-full w-full bg-background [&_.mapboxgl-map_.mapboxgl-ctrl-logo]:hidden [&_canvas]:outline-none">
+    <div className="relative h-full w-full bg-background [&_.mapboxgl-map_.mapboxgl-ctrl-logo]:!hidden [&_canvas]:!outline-none">
       <div ref={mapContainerRef} className="h-full w-full" />
     </div>
   )
