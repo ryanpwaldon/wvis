@@ -27,7 +27,7 @@ export const viewport: Viewport = {
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html className="h-full w-full" lang="en" suppressHydrationWarning>
-      <body className={cn('h-full w-full bg-background font-sans text-foreground antialiased', GeistSans.variable, GeistMono.variable)}>
+      <body className={cn('fixed left-0 top-0 h-full w-full bg-background font-sans text-foreground antialiased', GeistSans.variable, GeistMono.variable)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TRPCReactProvider>{props.children}</TRPCReactProvider>
         </ThemeProvider>

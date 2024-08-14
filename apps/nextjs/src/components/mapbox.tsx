@@ -2,9 +2,15 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+import { cn } from '@sctv/ui'
+
 import useMap from '~/hooks/useMap'
 
-export const Mapbox = () => {
+interface MapboxProps {
+  className?: string
+}
+
+export const Mapbox = ({ className }: MapboxProps) => {
   const [mapInit, setMapInit] = useState(false)
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const { map } = useMap({
@@ -25,7 +31,7 @@ export const Mapbox = () => {
   }, [map, mapInit])
 
   return (
-    <div className="relative h-full w-full bg-background [&_.mapboxgl-map_.mapboxgl-ctrl-logo]:!hidden [&_canvas]:!outline-none">
+    <div className={cn('relative h-full w-full bg-background [&_.mapboxgl-map_.mapboxgl-ctrl-logo]:!hidden [&_canvas]:!outline-none', className)}>
       <div ref={mapContainerRef} className="h-full w-full" />
     </div>
   )

@@ -30,7 +30,8 @@
     "react": "catalog:react18",
     "react-dom": "catalog:react18",
     "superjson": "2.2.1",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "date-fns": "catalog:"
   },
   "devDependencies": {
     "@sctv/eslint-config": "workspace:*",
