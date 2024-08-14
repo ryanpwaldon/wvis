@@ -1,13 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { startOfDay } from 'date-fns'
 
 import { Mapbox } from '~/components/mapbox'
 import { Timeline } from './timeline'
 
 export const Home = () => {
-  const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()))
+  const [selectedDate, setSelectedDate] = useState(new Date())
   const handleDateChange = (date: Date) => setSelectedDate(date)
 
   return (
