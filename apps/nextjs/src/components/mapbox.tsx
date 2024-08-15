@@ -1,38 +1,43 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import type { StyleSpecification } from 'mapbox-gl'
+import React, { createContext, useEffect, useRef } from 'react'
+import { Map } from 'mapbox-gl'
 
 import { cn } from '@sctv/ui'
 
-import useMap from '~/hooks/useMap'
+import { env } from '~/env'
+import { mapboxStyle } from './mapbox-style'
 
 interface MapboxProps {
   className?: string
+  children?: React.ReactNode
 }
 
-export const Mapbox = ({ className }: MapboxProps) => {
-  const [mapInit, setMapInit] = useState(false)
+export const MapboxContext = createContext<Map | null>(null)
+
+export const Mapbox = ({ className, children }: MapboxProps) => {
+  const mapRef = useRef<Map | null>(null)
   const mapContainerRef = useRef<HTMLDivElement>(null)
-  const { map } = useMap({
-    mapContainerRef,
-    options: {
-      center: [-74.5, 40],
-      zoom: 2,
-    },
-  })
 
   useEffect(() => {
-    if (map && !mapInit) {
-      setMapInit(true)
-      map.once('load', () => {
-        return
+    if (!mapRef.current && mapContainerRef.current) {
+      mapRef.current = new Map({
+        zoom: 2,
+        center: [-74.5, 40],
+        attributionControl: false,
+        projection: { name: 'mercator' },
+        container: mapContainerRef.current,
+        style: mapboxStyle as StyleSpecification,
+        accessToken: env.NEXT_PUBLIC_MAPBOX_API_KEY,
       })
     }
-  }, [map, mapInit])
+  }, [mapRef, mapContainerRef])
 
   return (
     <div className={cn('relative h-full w-full bg-background [&_.mapboxgl-map_.mapboxgl-ctrl-logo]:!hidden [&_canvas]:!outline-none', className)}>
       <div ref={mapContainerRef} className="h-full w-full" />
+      <MapboxContext.Provider value={mapRef.current}>{children}</MapboxContext.Provider>
     </div>
   )
 }
