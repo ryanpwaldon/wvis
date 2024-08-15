@@ -1,15 +1,38 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
+
 import { useMapbox } from '~/hooks/useMapbox'
+import { ParticleRenderer } from '~/utils/particleRenderer'
 
 interface MapboxParticleLayerProps {
-  amount?: number
+  imageData: ImageData | null
 }
 
-export const MapboxParticleLayer = ({ amount = 1000 }: MapboxParticleLayerProps) => {
+export const MapboxParticleLayer = ({ imageData }: MapboxParticleLayerProps) => {
   const map = useMapbox()
-  console.log(map.loaded())
-  amount.toFixed()
+  const particleRenderer = useRef<ParticleRenderer | null>(null)
 
+  useEffect(() => {
+    if (!imageData) return
+    if (!particleRenderer.current) {
+      map.addLayer(
+        {
+          id: 'particle-renderer',
+          type: 'custom',
+          onAdd: (map, gl) => {
+            particleRenderer.current = new ParticleRenderer(map, gl)
+            particleRenderer.current.initialize(imageData)
+          },
+          render: () => particleRenderer.current?.draw(),
+        },
+        'settlement-subdivision-label',
+      )
+      map.on('movestart', () => particleRenderer.current?.stopAnimation())
+      map.on('moveend', () => particleRenderer.current?.startAnimation())
+    } else {
+      particleRenderer.current.updateVectorField(imageData)
+    }
+  }, [imageData, map])
   return null
 }

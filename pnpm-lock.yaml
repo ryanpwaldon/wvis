@@ -157,6 +157,9 @@ importers:
       superjson:
         specifier: 2.2.1
         version: 2.2.1
+      twgl.js:
+        specifier: ^5.5.4
+        version: 5.5.4
       zod:
         specifier: 'catalog:'
         version: 3.23.8
@@ -450,7 +453,7 @@ importers:
         version: 7.35.0(eslint@9.7.0)
       eslint-plugin-react-hooks:
         specifier: rc
-        version: 5.1.0-rc-d48603a5-20240813(eslint@9.7.0)
+        version: 5.1.0-rc-49496d49-20240814(eslint@9.7.0)
       eslint-plugin-turbo:
         specifier: ^2.0.8
         version: 2.0.8(eslint@9.7.0)
@@ -3075,8 +3078,8 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
 
-  eslint-plugin-react-hooks@5.1.0-rc-d48603a5-20240813:
-    resolution: {integrity: sha512-T5iENFr+/a1pZ9qog/tKWfPi0cME190dYbDC7MJUjKx7BZ/AxiLdbRAuOAQ60BHz2/rvLC9SYGIhXSCeK6EKoA==}
+  eslint-plugin-react-hooks@5.1.0-rc-49496d49-20240814:
+    resolution: {integrity: sha512-A5hwoU0WxNLjuPa9vH0+4Sh+GOcfBIgZJ0cbwu9UECyD8VbIv+N3all4yyHqFQqcz10qzoHHLSuRFE4O7AC5PQ==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -5149,6 +5152,9 @@ packages:
 
   tweakpane@4.0.4:
     resolution: {integrity: sha512-RkWD54zDlEbnN01wQPk0ANHGbdCvlJx/E8A1QxhTfCbX+ROWos1Ws2MnhOm39aUGMOh+36TjUwpDmLfmwTr1Fg==}
+
+  twgl.js@5.5.4:
+    resolution: {integrity: sha512-6kFOmijOpmblTN9CCwOTCxK4lPg7rCyQjLuub6EMOlEp89Ex6yUcsMjsmH7andNPL2NE3XmHdqHeP5gVKKPhxw==}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -7927,7 +7933,7 @@ snapshots:
       safe-regex-test: 1.0.3
       string.prototype.includes: 2.0.0
 
-  eslint-plugin-react-hooks@5.1.0-rc-d48603a5-20240813(eslint@9.7.0):
+  eslint-plugin-react-hooks@5.1.0-rc-49496d49-20240814(eslint@9.7.0):
     dependencies:
       eslint: 9.7.0
 
@@ -10261,6 +10267,8 @@ snapshots:
       turbo-windows-arm64: 2.0.8
 
   tweakpane@4.0.4: {}
+
+  twgl.js@5.5.4: {}
 
   type-check@0.4.0:
     dependencies:

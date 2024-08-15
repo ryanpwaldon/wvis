@@ -1,0 +1,102 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+interface UseImageDataResult {
+  imageData: ImageData | null
+  isLoading: boolean
+  error: Error | null
+}
+
+function useImageData(url: string | null): UseImageDataResult {
+  const [imageData, setImageData] = useState<ImageData | null>(null)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const latestUrl = useRef<string | null>(url)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+
+  useEffect(() => {
+    latestUrl.current = url
+  }, [url])
+
+  const loadImage = useCallback((url: string) => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+
+    img.onload = () => {
+      if (url === latestUrl.current) {
+        if (canvasRef.current) {
+          const ctx = canvasRef.current.getContext('2d')
+          if (ctx) {
+            ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+          }
+        }
+
+        canvasRef.current = document.createElement('canvas')
+        canvasRef.current.width = img.width
+        canvasRef.current.height = img.height
+        const ctx = canvasRef.current.getContext('2d')
+
+        if (ctx) {
+          ctx.drawImage(img, 0, 0)
+          const imgData = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height)
+          setImageData(imgData)
+          setIsLoading(false)
+          setError(null)
+        } else {
+          setError(new Error('Could not get 2D context from canvas'))
+          setIsLoading(false)
+        }
+      }
+    }
+
+    img.onerror = () => {
+      if (url === latestUrl.current) {
+        setError(new Error('Failed to load image'))
+        setIsLoading(false)
+      }
+    }
+
+    img.src = url
+
+    return () => {
+      img.onload = null
+      img.onerror = null
+    }
+  }, [])
+
+  useEffect(() => {
+    if (url) {
+      setIsLoading(true)
+      const cleanup = loadImage(url)
+
+      return () => {
+        cleanup()
+        if (canvasRef.current) {
+          const ctx = canvasRef.current.getContext('2d')
+          if (ctx) {
+            ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+          }
+          canvasRef.current = null
+        }
+      }
+    } else {
+      // Reset state when URL is null
+      setImageData(null)
+      setIsLoading(false)
+      setError(null)
+
+      // Clean up any existing canvas
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d')
+        if (ctx) {
+          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+        }
+        canvasRef.current = null
+      }
+    }
+  }, [url, loadImage])
+
+  return { imageData, isLoading, error }
+}
+
+export default useImageData
