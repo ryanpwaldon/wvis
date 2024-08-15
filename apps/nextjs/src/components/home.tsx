@@ -6,14 +6,13 @@ import { Mapbox } from '~/components/mapbox'
 import { Timeline } from './timeline'
 
 export const Home = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date())
-  const handleDateChange = (date: Date) => setSelectedDate(date)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
   return (
     <div className="h-full w-full p-4">
-      <div className="flex h-full w-full flex-col overflow-hidden border">
+      <div className="flex h-full w-full flex-col divide-y overflow-hidden border">
         <Mapbox />
-        <Timeline value={selectedDate} onChange={handleDateChange} />
+        <Timeline steps={3} days={7} value={selectedDate} onChange={setSelectedDate} />
       </div>
     </div>
   )

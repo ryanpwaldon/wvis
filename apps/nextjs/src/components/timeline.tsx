@@ -1,45 +1,77 @@
-import { useEffect, useState } from 'react'
-import { addHours, differenceInHours, format, startOfDay } from 'date-fns'
+import React, { useCallback, useEffect, useState } from 'react'
+import { add, format, isAfter, isBefore, startOfDay } from 'date-fns'
 
-import { cn } from '@sctv/ui'
 import { Slider } from '@sctv/ui/slider'
 
+enum Step {
+  One = 1,
+  Two = 2,
+  Three = 3,
+  Four = 4,
+  Six = 6,
+  Eight = 8,
+  Twelve = 12,
+}
+
 interface TimelineProps {
-  className?: string
-  value: Date
+  steps: Step
+  days: number
+  value: Date | null
   onChange: (date: Date) => void
 }
 
-export const Timeline = ({ className, value, onChange }: TimelineProps) => {
+export const Timeline = ({ steps, days, value, onChange }: TimelineProps) => {
+  const [sliderValue, setSliderValue] = useState<number>(0)
+
   const startDate = startOfDay(new Date())
-  const totalHours = 16 * 24 // 16 days * 24 hours
-  const [sliderValue, setSliderValue] = useState(0)
+  const endDate = add(startDate, { days })
+
+  const totalHours = days * 24
+  const stepsCount = totalHours / steps
+
+  const clampToStep = useCallback(
+    (date: Date): Date => {
+      const hoursSinceStart = (date.getTime() - startDate.getTime()) / (1000 * 60 * 60)
+      const clampedHours = Math.floor(hoursSinceStart / steps) * steps
+      return add(startDate, { hours: clampedHours })
+    },
+    [startDate, steps],
+  )
 
   useEffect(() => {
-    const hoursSinceStart = differenceInHours(value, startDate)
-    setSliderValue(hoursSinceStart)
-  }, [value, startDate])
+    if (value === null) {
+      const now = new Date()
+      const initialValue = clampToStep(now)
+      onChange(initialValue)
+    } else {
+      const hours = (value.getTime() - startDate.getTime()) / (1000 * 60 * 60)
+      setSliderValue(hours / steps)
+    }
+  }, [value, steps, startDate, clampToStep, onChange])
 
-  const formatSliderLabel = (hours: number): string => {
-    const date = addHours(startDate, hours)
-    return format(date, 'MMM d, h aa')
-  }
+  const handleSliderChange = ([newValue]: number[]) => {
+    if (typeof newValue !== 'number') return
+    const hours = newValue * steps
+    const newDate = add(startDate, { hours })
 
-  const handleSliderChange = (newValue: number[]) => {
-    if (newValue[0] !== undefined) {
-      const newDate = addHours(startDate, newValue[0])
+    if (isBefore(newDate, startDate)) {
+      onChange(startDate)
+    } else if (isAfter(newDate, endDate)) {
+      onChange(endDate)
+    } else {
       onChange(newDate)
     }
   }
 
+  const formatSliderValue = (value: number): string => {
+    const date = add(startDate, { hours: value * steps })
+    return format(date, 'MMM d, yyyy HH:mm')
+  }
+
   return (
-    <div className={cn('w-full px-4 py-8', className)}>
-      <Slider min={0} max={totalHours - 1} step={1} value={[sliderValue]} onValueChange={handleSliderChange} className="w-full" />
-      <div className="mt-4 flex justify-between text-sm text-gray-600">
-        <span>{formatSliderLabel(0)}</span>
-        <span>{formatSliderLabel(totalHours - 1)}</span>
-      </div>
-      <div className="mt-2 text-center text-lg font-semibold">{formatSliderLabel(sliderValue)}</div>
+    <div className="w-full p-2">
+      <Slider min={0} max={stepsCount} step={1} value={[sliderValue]} onValueChange={handleSliderChange} />
+      <div className="mt-2 text-center">{formatSliderValue(sliderValue)}</div>
     </div>
   )
 }
