@@ -2,13 +2,14 @@
 
 import { useMapbox } from '~/hooks/useMapbox'
 
-interface MapboxParticleLayer {
+interface MapboxParticleLayerProps {
   amount?: number
 }
 
-export const MapboxParticleLayer = ({ amount = 1000 }: MapboxParticleLayer) => {
+export const MapboxParticleLayer = ({ amount = 1000 }: MapboxParticleLayerProps) => {
   const map = useMapbox()
-  console.log(amount)
-  console.log(map.isStyleLoaded())
+  console.log(map.loaded())
+  amount.toFixed()
+
   return null
 }
