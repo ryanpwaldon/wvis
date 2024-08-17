@@ -3,7 +3,7 @@ import type { ProgramInfo } from 'twgl.js'
 import { MercatorCoordinate } from 'mapbox-gl'
 import { createBufferInfoFromArrays, createProgramInfo, createTextures, drawBufferInfo, setBuffersAndAttributes, setUniforms } from 'twgl.js'
 
-export const vertexShader = `
+export const vertexShader = /*glsl*/ `
 precision highp float;
 attribute float a_index;
 uniform sampler2D u_particles;
@@ -22,7 +22,7 @@ void main() {
 }
 `
 
-export const fragmentShader = `
+export const fragmentShader = /*glsl*/ `
 precision highp float;
 uniform sampler2D u_vector;
 uniform vec2 u_vector_min;
@@ -58,7 +58,7 @@ void main() {
 }
 `
 
-export const vertexShaderQuad = `
+export const vertexShaderQuad = /*glsl*/ `
 precision highp float;
 attribute vec2 a_pos;
 varying vec2 v_tex_pos;
@@ -68,7 +68,7 @@ void main() {
 }
 `
 
-export const fragmentShaderScreen = `
+export const fragmentShaderScreen = /*glsl*/ `
 precision highp float;
 uniform sampler2D u_screen;
 uniform float u_opacity;
@@ -80,7 +80,7 @@ void main() {
 }
 `
 
-export const fragmentShaderUpdate = `
+export const fragmentShaderUpdate = /*glsl*/ `
 precision highp float;
 uniform sampler2D u_particles;
 uniform sampler2D u_vector;
