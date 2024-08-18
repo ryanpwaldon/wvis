@@ -3,6 +3,31 @@ import type { ProgramInfo } from 'twgl.js'
 import { MercatorCoordinate } from 'mapbox-gl'
 import { createBufferInfoFromArrays, createProgramInfo, createTextures, drawBufferInfo, setBuffersAndAttributes, setUniforms } from 'twgl.js'
 
+// Returns all pixels
+export const vQuad = /* glsl */ `
+  precision highp float;
+  attribute vec2 a_pos;
+  varying vec2 v_tex_pos;
+  void main() {
+    v_tex_pos = a_pos;
+    gl_Position = vec4(1.0 - 2.0 * a_pos, 0, 1);
+  }
+`
+
+// Receives all pixels
+// Draws every pixel
+export const fScreenDraw = /* glsl */ `
+  precision highp float;
+  uniform sampler2D u_screen;
+  uniform float u_opacity;
+  varying vec2 v_tex_pos;
+  void main() {
+    vec4 color = texture2D(u_screen, 1.0 - v_tex_pos);
+    // a hack to guarantee opacity fade out even with a value close to 1.0
+    gl_FragColor = vec4(floor(255.0 * color * u_opacity) / 255.0);
+  }
+`
+
 // Returns particle pixels
 export const vParticlesDraw = /* glsl */ `
   precision highp float;
@@ -49,31 +74,6 @@ export const fParticlesDraw = /* glsl */ `
       discard;
     }
     gl_FragColor = vec4(1.0, 1.0, 1.0, 0.33);
-  }
-`
-
-// Returns all pixels
-export const vQuad = /* glsl */ `
-  precision highp float;
-  attribute vec2 a_pos;
-  varying vec2 v_tex_pos;
-  void main() {
-    v_tex_pos = a_pos;
-    gl_Position = vec4(1.0 - 2.0 * a_pos, 0, 1);
-  }
-`
-
-// Receives all pixels
-// Draws every pixel
-export const fScreenDraw = /* glsl */ `
-  precision highp float;
-  uniform sampler2D u_screen;
-  uniform float u_opacity;
-  varying vec2 v_tex_pos;
-  void main() {
-    vec4 color = texture2D(u_screen, 1.0 - v_tex_pos);
-    // a hack to guarantee opacity fade out even with a value close to 1.0
-    gl_FragColor = vec4(floor(255.0 * color * u_opacity) / 255.0);
   }
 `
 
