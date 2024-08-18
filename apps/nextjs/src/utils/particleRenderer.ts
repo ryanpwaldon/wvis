@@ -13,7 +13,7 @@ export const vertexShader = /* glsl */ `
   void main() {
     vec4 color = texture2D(u_particles, vec2(fract(a_index / u_particles_res), floor(a_index / u_particles_res) / u_particles_res));
     v_particle_pos = vec2(color.r / 255.0 + color.b, color.g / 255.0 + color.a);
-    gl_PointSize = 1.0;
+    gl_PointSize = 2.0;
     gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, 1.0 - 2.0 * v_particle_pos.y, 0, 1);
   }
 `
@@ -154,7 +154,7 @@ class ParticleRenderer {
   private readonly PARTICLE_SPEED_FACTOR = 0.3
   private readonly PARTICLE_DROP_RATE = 0.01
   private readonly PARTICLE_DROP_RATE_INCREASE = 0.05
-  private readonly PARTICLE_COUNT = 2000
+  private readonly PARTICLE_COUNT = 10000
 
   private map: Map
   private gl: WebGL2RenderingContext
