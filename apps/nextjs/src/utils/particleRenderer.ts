@@ -288,14 +288,14 @@ class ParticleRenderer {
     this.gl.disable(this.gl.DEPTH_TEST)
     this.gl.disable(this.gl.STENCIL_TEST)
 
-    // Draw screen
+    // Render backgroundTexture to the screenTexture
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.offscreenFramebuffer)
     this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.renderTextures.screenTexture, 0)
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height)
     this.gl.disable(this.gl.BLEND)
     this.renderTextureToScreen(this.renderTextures.backgroundTexture, this.PARTICLE_FADE_RATE)
 
-    // Draw particles
+    // Render particles to screenTexture
     this.gl.useProgram(this.mainProgramInfo.program)
     const particleAttributes = { a_index: { numComponents: 1, data: this.particleIndexArray } }
     const particleBufferInfo = createBufferInfoFromArrays(this.gl, particleAttributes)
@@ -312,7 +312,7 @@ class ParticleRenderer {
     setUniforms(this.mainProgramInfo, particleUniforms)
     drawBufferInfo(this.gl, particleBufferInfo, this.gl.POINTS)
 
-    // Render to map canvas
+    // Render screenTexture to screen
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null)
     this.gl.enable(this.gl.BLEND)
     this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA)
