@@ -26,8 +26,8 @@ export const Mapbox = ({ className, children }: MapboxProps) => {
   useEffect(() => {
     if (!mapRef.current && mapContainerRef.current) {
       mapRef.current = new Map({
-        zoom: 2,
-        center: [-74.5, 40],
+        zoom: 1.5,
+        center: [-180, 0],
         attributionControl: false,
         projection: { name: 'mercator' },
         container: mapContainerRef.current,
