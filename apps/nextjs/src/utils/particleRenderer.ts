@@ -37,7 +37,7 @@ vec2 returnLonLat(float x_domain, float y_domain, vec2 pos) {
   float mercator_y = u_bounds.w + pos.y * y_domain;
   float lon = mercator_x * 360.0 - 180.0;
   float lat2 = 180.0 - mercator_y * 360.0;
-  float lat = 360.0 / 3.141592654 * atan(exp(lat2 * 3.141592654/180.0)) - 90.0;
+  float lat = 90.0 - (360.0 / 3.141592654 * atan(exp(lat2 * 3.141592654/180.0)));
   return vec2(lon, lat);
 }
 void main() {
@@ -118,7 +118,7 @@ vec2 returnLonLat(float x_domain, float y_domain, vec2 pos) {
   float mercator_y = u_bounds.w + pos.y * y_domain;
   float lon = mercator_x * 360.0 - 180.0;
   float lat2 = 180.0 - mercator_y * 360.0;
-  float lat = 360.0 / 3.141592654 * atan(exp(lat2 * 3.141592654/180.0)) - 90.0;
+  float lat = 90.0 - (360.0 / 3.141592654 * atan(exp(lat2 * 3.141592654/180.0)));
   return vec2(lon, lat);
 }
 void main() {
