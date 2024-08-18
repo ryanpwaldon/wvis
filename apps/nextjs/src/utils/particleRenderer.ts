@@ -4,7 +4,7 @@ import { MercatorCoordinate } from 'mapbox-gl'
 import { createBufferInfoFromArrays, createProgramInfo, createTextures, drawBufferInfo, setBuffersAndAttributes, setUniforms } from 'twgl.js'
 
 // Returns particle pixels
-export const vertexShader = /* glsl */ `
+export const vParticlesDraw = /* glsl */ `
   precision highp float;
   attribute float a_index;
   uniform sampler2D u_particles;
@@ -21,7 +21,7 @@ export const vertexShader = /* glsl */ `
 
 // Receives particle pixels
 // Draws all particles
-export const fragmentShader = /* glsl */ `
+export const fParticlesDraw = /* glsl */ `
   precision highp float;
   uniform sampler2D u_vector;
   uniform vec2 u_vector_min;
@@ -53,7 +53,7 @@ export const fragmentShader = /* glsl */ `
 `
 
 // Returns all pixels
-export const vertexShaderQuad = /* glsl */ `
+export const vQuad = /* glsl */ `
   precision highp float;
   attribute vec2 a_pos;
   varying vec2 v_tex_pos;
@@ -65,7 +65,7 @@ export const vertexShaderQuad = /* glsl */ `
 
 // Receives all pixels
 // Draws every pixel
-export const fragmentShaderScreen = /* glsl */ `
+export const fScreenDraw = /* glsl */ `
   precision highp float;
   uniform sampler2D u_screen;
   uniform float u_opacity;
@@ -79,7 +79,7 @@ export const fragmentShaderScreen = /* glsl */ `
 
 // Receives all pixels
 // Draws every pixel
-export const fragmentShaderUpdate = /* glsl */ `
+export const fParticlesUpdate = /* glsl */ `
   precision highp float;
   uniform sampler2D u_particles;
   uniform sampler2D u_vector;
@@ -167,9 +167,9 @@ class ParticleRenderer {
   private map: Map
   private gl: WebGL2RenderingContext
   private vectorFieldData?: ImageData
-  private mainProgramInfo?: ProgramInfo
-  private screenRenderProgramInfo?: ProgramInfo
-  private particleUpdateProgramInfo?: ProgramInfo
+  private screenDrawProgram?: ProgramInfo
+  private particlesDrawProgram?: ProgramInfo
+  private particlesUpdateProgram?: ProgramInfo
   private renderTextures?: RenderTextures
   private particleTextures?: ParticleTextures
   private offscreenFramebuffer: WebGLFramebuffer | null = null
@@ -186,9 +186,9 @@ class ParticleRenderer {
 
   public initialize(vectorFieldImage: ImageData): void {
     this.vectorFieldData = vectorFieldImage
-    this.mainProgramInfo = createProgramInfo(this.gl, [vertexShader, fragmentShader])
-    this.screenRenderProgramInfo = createProgramInfo(this.gl, [vertexShaderQuad, fragmentShaderScreen])
-    this.particleUpdateProgramInfo = createProgramInfo(this.gl, [vertexShaderQuad, fragmentShaderUpdate])
+    this.screenDrawProgram = createProgramInfo(this.gl, [vQuad, fScreenDraw])
+    this.particlesDrawProgram = createProgramInfo(this.gl, [vParticlesDraw, fParticlesDraw])
+    this.particlesUpdateProgram = createProgramInfo(this.gl, [vQuad, fParticlesUpdate])
     this.initializeParticles()
     const emptyTextureData = new Uint8Array(this.gl.canvas.width * this.gl.canvas.height * 4)
     this.renderTextures = createTextures(this.gl, {
@@ -271,13 +271,13 @@ class ParticleRenderer {
   }
 
   private renderTextureToScreen(texture: WebGLTexture, opacity: number): void {
-    if (!this.screenRenderProgramInfo) return
-    this.gl.useProgram(this.screenRenderProgramInfo.program)
+    if (!this.screenDrawProgram) return
+    this.gl.useProgram(this.screenDrawProgram.program)
     const quadVertices = { a_pos: { numComponents: 2, data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]) } }
     const renderUniforms = { u_screen: texture, u_opacity: opacity }
     const quadBufferInfo = createBufferInfoFromArrays(this.gl, quadVertices)
-    setBuffersAndAttributes(this.gl, this.screenRenderProgramInfo, quadBufferInfo)
-    setUniforms(this.screenRenderProgramInfo, renderUniforms)
+    setBuffersAndAttributes(this.gl, this.screenDrawProgram, quadBufferInfo)
+    setUniforms(this.screenDrawProgram, renderUniforms)
     drawBufferInfo(this.gl, quadBufferInfo)
   }
 
@@ -286,8 +286,8 @@ class ParticleRenderer {
       this.animationState !== 'ANIMATING' ||
       !this.offscreenFramebuffer ||
       !this.renderTextures ||
-      !this.mainProgramInfo ||
-      !this.particleUpdateProgramInfo ||
+      !this.particlesDrawProgram ||
+      !this.particlesUpdateProgram ||
       !this.particleTextures ||
       !this.vectorFieldData
     )
@@ -304,7 +304,7 @@ class ParticleRenderer {
     this.renderTextureToScreen(this.renderTextures.backgroundTexture, this.PARTICLE_FADE_RATE)
 
     // Render particles to screenTexture
-    this.gl.useProgram(this.mainProgramInfo.program)
+    this.gl.useProgram(this.particlesDrawProgram.program)
     const particleAttributes = { a_index: { numComponents: 1, data: this.particleIndexArray } }
     const particleBufferInfo = createBufferInfoFromArrays(this.gl, particleAttributes)
     const particleUniforms = {
@@ -316,8 +316,8 @@ class ParticleRenderer {
       u_bounds: this.mapViewportBounds,
       u_data_bounds: this.LONGITUDE_LATITUDE_BOUNDS,
     }
-    setBuffersAndAttributes(this.gl, this.mainProgramInfo, particleBufferInfo)
-    setUniforms(this.mainProgramInfo, particleUniforms)
+    setBuffersAndAttributes(this.gl, this.particlesDrawProgram, particleBufferInfo)
+    setUniforms(this.particlesDrawProgram, particleUniforms)
     drawBufferInfo(this.gl, particleBufferInfo, this.gl.POINTS)
 
     // Render screenTexture to screen
@@ -332,7 +332,7 @@ class ParticleRenderer {
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.offscreenFramebuffer)
     this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.particleTextures.particleTextureDestination, 0)
     this.gl.viewport(0, 0, this.particleTextureResolution, this.particleTextureResolution)
-    this.gl.useProgram(this.particleUpdateProgramInfo.program)
+    this.gl.useProgram(this.particlesUpdateProgram.program)
     const quadVertices = { a_pos: { numComponents: 2, data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]) } }
     const updateUniforms = {
       u_vector: this.renderTextures.vectorFieldTexture,
@@ -348,8 +348,8 @@ class ParticleRenderer {
       u_data_bounds: this.LONGITUDE_LATITUDE_BOUNDS,
     }
     const quadBufferInfo = createBufferInfoFromArrays(this.gl, quadVertices)
-    setBuffersAndAttributes(this.gl, this.particleUpdateProgramInfo, quadBufferInfo)
-    setUniforms(this.particleUpdateProgramInfo, updateUniforms)
+    setBuffersAndAttributes(this.gl, this.particlesUpdateProgram, quadBufferInfo)
+    setUniforms(this.particlesUpdateProgram, updateUniforms)
     drawBufferInfo(this.gl, quadBufferInfo)
     ;[this.particleTextures.particleTextureSource, this.particleTextures.particleTextureDestination] = [this.particleTextures.particleTextureDestination, this.particleTextures.particleTextureSource] // prettier-ignore
   }
