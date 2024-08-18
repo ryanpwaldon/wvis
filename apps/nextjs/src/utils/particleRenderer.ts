@@ -168,9 +168,9 @@ class ParticleRenderer {
   private gl: WebGL2RenderingContext
   private vectorFieldData?: ImageData
   private mainProgramInfo?: ProgramInfo
-  private renderTextures?: RenderTextures
   private screenRenderProgramInfo?: ProgramInfo
   private particleUpdateProgramInfo?: ProgramInfo
+  private renderTextures?: RenderTextures
   private particleTextures?: ParticleTextures
   private offscreenFramebuffer: WebGLFramebuffer | null = null
   private particleIndexArray?: Float32Array
