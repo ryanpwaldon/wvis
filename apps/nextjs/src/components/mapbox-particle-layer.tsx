@@ -30,6 +30,7 @@ export const MapboxParticleLayer = ({ imageData }: MapboxParticleLayerProps) => 
       )
       map.on('movestart', () => particleRenderer.current?.stopAnimation())
       map.on('moveend', () => particleRenderer.current?.startAnimation())
+      map.on('resize', () => particleRenderer.current?.resizeTextures())
     } else {
       particleRenderer.current.updateVectorField(imageData)
     }

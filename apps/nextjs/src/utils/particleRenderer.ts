@@ -393,6 +393,36 @@ class ParticleRenderer {
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null)
     this.gl.clear(this.gl.COLOR_BUFFER_BIT)
   }
+
+  public resizeTextures(): void {
+    if (!this.renderTextures) return console.error('Render textures not initialized.')
+    const emptyTextureData = new Uint8Array(this.gl.canvas.width * this.gl.canvas.height * 4)
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.renderTextures.backgroundTexture)
+    this.gl.texImage2D(
+      this.gl.TEXTURE_2D,
+      0,
+      this.gl.RGBA,
+      this.gl.canvas.width,
+      this.gl.canvas.height,
+      0,
+      this.gl.RGBA,
+      this.gl.UNSIGNED_BYTE,
+      emptyTextureData,
+    )
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.renderTextures.screenTexture)
+    this.gl.texImage2D(
+      this.gl.TEXTURE_2D,
+      0,
+      this.gl.RGBA,
+      this.gl.canvas.width,
+      this.gl.canvas.height,
+      0,
+      this.gl.RGBA,
+      this.gl.UNSIGNED_BYTE,
+      emptyTextureData,
+    )
+    this.gl.bindTexture(this.gl.TEXTURE_2D, null)
+  }
 }
 
 export { ParticleRenderer }
