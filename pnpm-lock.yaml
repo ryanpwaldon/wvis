@@ -434,6 +434,27 @@ importers:
         specifier: 'catalog:'
         version: 5.5.3
 
+  packages/weather:
+    devDependencies:
+      '@sctv/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
+      '@sctv/prettier-config':
+        specifier: workspace:*
+        version: link:../../tooling/prettier
+      '@sctv/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      eslint:
+        specifier: 'catalog:'
+        version: 9.7.0
+      prettier:
+        specifier: 'catalog:'
+        version: 3.3.3
+      typescript:
+        specifier: 'catalog:'
+        version: 5.5.3
+
   tooling/eslint:
     dependencies:
       '@eslint/compat':
@@ -453,7 +474,7 @@ importers:
         version: 7.35.0(eslint@9.7.0)
       eslint-plugin-react-hooks:
         specifier: rc
-        version: 5.1.0-rc-49496d49-20240814(eslint@9.7.0)
+        version: 5.1.0-rc-1eaccd82-20240816(eslint@9.7.0)
       eslint-plugin-turbo:
         specifier: ^2.0.8
         version: 2.0.8(eslint@9.7.0)
@@ -3078,8 +3099,8 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
 
-  eslint-plugin-react-hooks@5.1.0-rc-49496d49-20240814:
-    resolution: {integrity: sha512-A5hwoU0WxNLjuPa9vH0+4Sh+GOcfBIgZJ0cbwu9UECyD8VbIv+N3all4yyHqFQqcz10qzoHHLSuRFE4O7AC5PQ==}
+  eslint-plugin-react-hooks@5.1.0-rc-1eaccd82-20240816:
+    resolution: {integrity: sha512-hEgkysGdyuEW0uL6ZUVzipHSoV5433VoxL9WRgRo5uUUaB7Niz++w4WFk0V44oXjLPu7ZlG8M1mprCBSfKtcYg==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -7933,7 +7954,7 @@ snapshots:
       safe-regex-test: 1.0.3
       string.prototype.includes: 2.0.0
 
-  eslint-plugin-react-hooks@5.1.0-rc-49496d49-20240814(eslint@9.7.0):
+  eslint-plugin-react-hooks@5.1.0-rc-1eaccd82-20240816(eslint@9.7.0):
     dependencies:
       eslint: 9.7.0
 
