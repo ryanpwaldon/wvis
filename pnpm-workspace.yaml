@@ -13,6 +13,7 @@ catalog:
   typescript: ^5.5.3
   zod: ^3.23.8
   date-fns: ^3.6.0
+  ky: ^1.7.0
 
 catalogs:
   react18:

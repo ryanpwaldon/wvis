@@ -1,1 +1,4 @@
-export const name = 'weather'
+import { processWind } from './tasks/wind'
+
+const res = await processWind()
+console.log(res)

@@ -15,6 +15,10 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "zod": "catalog:",
+    "ky": "catalog:"
+  },
   "devDependencies": {
     "@sctv/eslint-config": "workspace:*",
     "@sctv/prettier-config": "workspace:*",
