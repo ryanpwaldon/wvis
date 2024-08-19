@@ -18,20 +18,20 @@ export const MapboxChoroplethLayer = ({ imageData }: MapboxChoroplethLayerProps)
     if (!choroplethRenderer.current) {
       map.addLayer(
         {
-          id: 'particle-renderer',
+          id: 'choropleth-renderer',
           type: 'custom',
           onAdd: (map, gl) => {
             choroplethRenderer.current = new ChoroplethRenderer(map, gl)
-            choroplethRenderer.current.initialize(imageData)
+            choroplethRenderer.current.updateMapBounds()
+            choroplethRenderer.current.setFlowField(imageData)
           },
           render: () => choroplethRenderer.current?.draw(),
         },
         'settlement-subdivision-label',
       )
-      map.on('movestart', () => choroplethRenderer.current?.stopAnimation())
-      map.on('moveend', () => choroplethRenderer.current?.startAnimation())
+      map.on('move', () => choroplethRenderer.current?.updateMapBounds())
     } else {
-      choroplethRenderer.current.updateVectorField(imageData)
+      choroplethRenderer.current.setFlowField(imageData)
     }
   }, [imageData, map])
   return null
