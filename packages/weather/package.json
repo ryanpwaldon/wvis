@@ -16,8 +16,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "zod": "catalog:",
-    "ky": "catalog:"
+    "grib-ts": "github:ryanpwaldon/grib-ts",
+    "jimp": "^0.22.12",
+    "ky": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@sctv/eslint-config": "workspace:*",
