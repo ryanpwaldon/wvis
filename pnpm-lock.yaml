@@ -207,6 +207,40 @@ importers:
         specifier: 'catalog:'
         version: 5.5.3
 
+  apps/weather:
+    dependencies:
+      grib-ts:
+        specifier: github:ryanpwaldon/grib-ts
+        version: https://codeload.github.com/ryanpwaldon/grib-ts/tar.gz/2353a8894b7dedbe9e8c8401effff4e587669ab6
+      jimp:
+        specifier: ^0.22.12
+        version: 0.22.12
+      ky:
+        specifier: 'catalog:'
+        version: 1.7.0
+      zod:
+        specifier: 'catalog:'
+        version: 3.23.8
+    devDependencies:
+      '@sctv/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
+      '@sctv/prettier-config':
+        specifier: workspace:*
+        version: link:../../tooling/prettier
+      '@sctv/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      eslint:
+        specifier: 'catalog:'
+        version: 9.7.0
+      prettier:
+        specifier: 'catalog:'
+        version: 3.3.3
+      typescript:
+        specifier: 'catalog:'
+        version: 5.5.3
+
   packages/api:
     dependencies:
       '@sctv/auth':
@@ -437,40 +471,6 @@ importers:
         specifier: 'catalog:'
         version: 5.5.3
 
-  packages/weather:
-    dependencies:
-      grib-ts:
-        specifier: github:ryanpwaldon/grib-ts
-        version: https://codeload.github.com/ryanpwaldon/grib-ts/tar.gz/2353a8894b7dedbe9e8c8401effff4e587669ab6
-      jimp:
-        specifier: ^0.22.12
-        version: 0.22.12
-      ky:
-        specifier: 'catalog:'
-        version: 1.7.0
-      zod:
-        specifier: 'catalog:'
-        version: 3.23.8
-    devDependencies:
-      '@sctv/eslint-config':
-        specifier: workspace:*
-        version: link:../../tooling/eslint
-      '@sctv/prettier-config':
-        specifier: workspace:*
-        version: link:../../tooling/prettier
-      '@sctv/tsconfig':
-        specifier: workspace:*
-        version: link:../../tooling/typescript
-      eslint:
-        specifier: 'catalog:'
-        version: 9.7.0
-      prettier:
-        specifier: 'catalog:'
-        version: 3.3.3
-      typescript:
-        specifier: 'catalog:'
-        version: 5.5.3
-
   tooling/eslint:
     dependencies:
       '@eslint/compat':
@@ -490,7 +490,7 @@ importers:
         version: 7.35.0(eslint@9.7.0)
       eslint-plugin-react-hooks:
         specifier: rc
-        version: 5.1.0-rc-6ebfd5b0-20240818(eslint@9.7.0)
+        version: 5.1.0-rc-a960b92c-20240819(eslint@9.7.0)
       eslint-plugin-turbo:
         specifier: ^2.0.8
         version: 2.0.8(eslint@9.7.0)
@@ -3302,8 +3302,8 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
 
-  eslint-plugin-react-hooks@5.1.0-rc-6ebfd5b0-20240818:
-    resolution: {integrity: sha512-6eErqy/1hus0qhGvPSVOYqHTB63lntNMcYmx4q2p//Zg6ExF3kYftlG2Heh5FEMPGQ/UqxERmZeqBx8kBW26ow==}
+  eslint-plugin-react-hooks@5.1.0-rc-a960b92c-20240819:
+    resolution: {integrity: sha512-18xsW8xcNX40F3O9Z66URXZjRQ7Vjjb1sOG3164D9nArpkzqxmagY3E9D0B+lbldpMQlROpQ4YJk7DLjSR2JhA==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -8525,7 +8525,7 @@ snapshots:
       safe-regex-test: 1.0.3
       string.prototype.includes: 2.0.0
 
-  eslint-plugin-react-hooks@5.1.0-rc-6ebfd5b0-20240818(eslint@9.7.0):
+  eslint-plugin-react-hooks@5.1.0-rc-a960b92c-20240819(eslint@9.7.0):
     dependencies:
       eslint: 9.7.0
 
