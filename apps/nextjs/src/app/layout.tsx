@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { GeistMono } from 'geist/font/mono'
-import { GeistSans } from 'geist/font/sans'
+import { Martian_Mono as FontMono } from 'next/font/google'
 
 import { cn } from '@sctv/ui'
 import { ThemeProvider } from '@sctv/ui/theme'
@@ -10,6 +9,11 @@ import { TRPCReactProvider } from '~/trpc/react'
 import '~/app/globals.css'
 
 import { env } from '~/env'
+
+const fontMono = FontMono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.VERCEL_ENV === 'production' ? 'https://sctv.com/' : 'http://localhost:3000'),
@@ -27,7 +31,7 @@ export const viewport: Viewport = {
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html className="h-full w-full" lang="en" suppressHydrationWarning>
-      <body className={cn('fixed left-0 top-0 h-full w-full bg-background font-sans text-foreground antialiased', GeistSans.variable, GeistMono.variable)}>
+      <body className={cn('fixed left-0 top-0 h-full w-full bg-background font-mono text-xs text-foreground antialiased', fontMono.variable)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TRPCReactProvider>{props.children}</TRPCReactProvider>
         </ThemeProvider>
