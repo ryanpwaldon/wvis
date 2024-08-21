@@ -19,7 +19,7 @@ export const processWind = async () => {
     return console.log('Job skipped. Wind tiles up to date.')
   }
   const modelRunDate = createDateFromComponents(latestModelRunDate, latestModelRunHour)
-  const forecastSchedule = generateForecastSchedule(modelRunDate, '3h', 1)
+  const forecastSchedule = generateForecastSchedule(modelRunDate, '3h', 7)
   console.log('Generated forecast schedule:', forecastSchedule)
   for (const forecastInfo of forecastSchedule) {
     console.log(`Processing image for forecast hour: ${forecastInfo.hourString} on ${forecastInfo.dateString}`)

@@ -40,7 +40,8 @@ class StorageService {
       const response = await this.S3.send(command)
       if (!response.Body) throw new Error('No body in the response.')
       const responseText = await response.Body.transformToString()
-      return jobInfoSchema.parse(responseText)
+      const responseData = JSON.parse(responseText) as unknown
+      return jobInfoSchema.parse(responseData)
     } catch (error) {
       if (error instanceof NoSuchKey) return null
       console.error('Error fetching latest job info:', error)
