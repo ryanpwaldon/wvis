@@ -2,7 +2,7 @@ import type { Message } from 'grib-ts/dist/message'
 import { GribReader, readMessageData } from 'grib-ts'
 import ky from 'ky'
 
-import type { ModelForecastHour, ModelRunDate, ModelRunHour } from '../validators'
+import type { JobInfo, ModelForecastHour, ModelRunDate, ModelRunHour } from '../validators'
 import { storageService } from '../services/storageService'
 import { createDateFromComponents } from '../utils/dateFromComponents'
 import { generateFlowFieldImage } from '../utils/generateFlowFieldImage'
@@ -25,7 +25,10 @@ export const processWind = async () => {
     console.log(`Processing image for forecast hour: ${forecastInfo.hourString} on ${forecastInfo.dateString}`)
     await processImage(latestModelRunDate, latestModelRunHour, forecastInfo.hourString, forecastInfo.dateString)
   }
-  console.log('Wind processing job completed.')
+  const newJobInfo: JobInfo = { modelRunDate: latestModelRunDate, modelRunHour: latestModelRunHour }
+  console.log('Updating job info...')
+  await storageService.updateJobInfo('wind', newJobInfo)
+  console.log('Job info updated. Wind processing job completed.')
 }
 
 export const processImage = async (

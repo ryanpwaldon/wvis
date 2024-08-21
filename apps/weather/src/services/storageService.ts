@@ -1,5 +1,6 @@
 import { GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
+import type { JobInfo } from '../validators'
 import { CLOUDFLARE_R2_BUCKET_NAME } from '../constants'
 import { env } from '../env'
 import { jobInfoSchema } from '../validators'
@@ -43,6 +44,26 @@ class StorageService {
     } catch (error) {
       if (error instanceof NoSuchKey) return null
       console.error('Error fetching latest job info:', error)
+      throw error
+    }
+  }
+
+  async updateJobInfo(dir: string, jobInfo: JobInfo) {
+    try {
+      const validJobInfo = jobInfoSchema.parse(jobInfo)
+      const jobInfoString = JSON.stringify(validJobInfo)
+
+      const command = new PutObjectCommand({
+        Bucket: CLOUDFLARE_R2_BUCKET_NAME,
+        Key: `${dir}/jobInfo.json`,
+        Body: jobInfoString,
+        ContentType: 'application/json',
+      })
+
+      await this.S3.send(command)
+      console.log('Job info updated successfully:', `${dir}/jobInfo.json`)
+    } catch (error) {
+      console.error('Error updating job info:', error)
       throw error
     }
   }
