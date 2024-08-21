@@ -238,7 +238,6 @@ class ParticleRenderer {
       this.gl.UNSIGNED_BYTE,
       this.vectorFieldData.data,
     )
-    this.clearParticles()
   }
 
   private initializeParticles(): void {
