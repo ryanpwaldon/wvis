@@ -13,6 +13,16 @@ enum Step {
   Twelve = 12,
 }
 
+const roundToNearestInterval = (date: Date, interval: Step): Date => {
+  console.log('local', date.toISOString())
+  const currentHour = date.getUTCHours()
+  const roundedHour = Math.round(currentHour / interval) * interval
+  const roundedDate = new Date(date)
+  roundedDate.setUTCHours(roundedHour, 0, 0, 0)
+  console.log('rounded', roundedDate.toISOString())
+  return roundedDate
+}
+
 interface TimelineProps {
   steps: Step
   days: number
@@ -33,7 +43,7 @@ export const Timeline = ({ steps, days, value, onChange }: TimelineProps) => {
     (date: Date): Date => {
       const hoursSinceStart = (date.getTime() - startDate.getTime()) / (1000 * 60 * 60)
       const clampedHours = Math.floor(hoursSinceStart / steps) * steps
-      return add(startDate, { hours: clampedHours })
+      return roundToNearestInterval(add(startDate, { hours: clampedHours }), steps)
     },
     [startDate, steps],
   )
@@ -44,7 +54,8 @@ export const Timeline = ({ steps, days, value, onChange }: TimelineProps) => {
       const initialValue = clampToStep(now)
       onChange(initialValue)
     } else {
-      const hours = (value.getTime() - startDate.getTime()) / (1000 * 60 * 60)
+      const roundedValue = roundToNearestInterval(value, steps)
+      const hours = (roundedValue.getTime() - startDate.getTime()) / (1000 * 60 * 60)
       setSliderValue(hours / steps)
     }
   }, [value, steps, startDate, clampToStep, onChange])
@@ -53,18 +64,19 @@ export const Timeline = ({ steps, days, value, onChange }: TimelineProps) => {
     if (typeof newValue !== 'number') return
     const hours = newValue * steps
     const newDate = add(startDate, { hours })
+    const roundedDate = roundToNearestInterval(newDate, steps)
 
-    if (isBefore(newDate, startDate)) {
+    if (isBefore(roundedDate, startDate)) {
       onChange(startDate)
-    } else if (isAfter(newDate, endDate)) {
+    } else if (isAfter(roundedDate, endDate)) {
       onChange(endDate)
     } else {
-      onChange(newDate)
+      onChange(roundedDate)
     }
   }
 
   const formatSliderValue = (value: number): string => {
-    const date = add(startDate, { hours: value * steps })
+    const date = roundToNearestInterval(add(startDate, { hours: value * steps }), steps)
     return format(date, 'MMM d, yyyy HH:mm')
   }
 
