@@ -8,3 +8,9 @@ export type ModelRunHour = z.infer<typeof modelRunHourSchema>
 
 export const modelForecaseHourSchema = z.string().regex(/^\d{3}$/)
 export type ModelForecastHour = z.infer<typeof modelForecaseHourSchema>
+
+export const jobInfoSchema = z.object({
+  modelRunDate: modelRunDateSchema,
+  modelRunHour: modelRunHourSchema,
+})
+export type JobInfo = z.infer<typeof jobInfoSchema>

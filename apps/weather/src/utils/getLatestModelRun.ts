@@ -34,7 +34,7 @@ const getLatestModelRunHour = async (modelRunDate: ModelRunDate) => {
 }
 
 export const getLatestModelRun = async () => {
-  const modelRunDate = await getLatestModelRunDate()
-  const modelRunHour = await getLatestModelRunHour(modelRunDate)
-  return { modelRunDate, modelRunHour }
+  const latestModelRunDate = await getLatestModelRunDate()
+  const latestModelRunHour = await getLatestModelRunHour(latestModelRunDate)
+  return { latestModelRunDate, latestModelRunHour }
 }

@@ -3,7 +3,7 @@ import jimp from 'jimp'
 const MIN_RANGE = -100
 const MAX_RANGE = 100
 
-export const generateFlowFieldImage = async (u: number[], v: number[], width: number, height: number, xOffset: number, outputPath: string) => {
+export const generateFlowFieldImage = async (u: number[], v: number[], width: number, height: number, xOffset: number): Promise<Buffer> => {
   if (u.length !== width * height || v.length !== width * height) throw new Error("Array size doesn't match the provided dimensions.")
 
   const image = new jimp(width, height, 0x00000000)
@@ -30,5 +30,5 @@ export const generateFlowFieldImage = async (u: number[], v: number[], width: nu
     }
   }
 
-  await image.writeAsync(outputPath)
+  return await image.getBufferAsync(jimp.MIME_PNG)
 }

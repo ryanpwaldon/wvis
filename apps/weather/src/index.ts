@@ -1,4 +1,7 @@
-// import { processWind } from './tasks/wind'
+import { processWind } from './tasks/wind'
 
-// const res = await processWind()
-console.log('hi')
+const main = async () => {
+  await processWind()
+}
+
+await main()
