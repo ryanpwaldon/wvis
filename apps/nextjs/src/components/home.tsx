@@ -22,7 +22,7 @@ export const Home = () => {
           <MapboxParticleLayer imageData={imageData} />
           <MapboxChoroplethLayer imageData={imageData} />
         </Mapbox>
-        <Timeline steps={3} days={7} value={selectedDate} onChange={setSelectedDate} />
+        <Timeline interval={3} days={7} onChange={setSelectedDate} />
       </div>
     </div>
   )
