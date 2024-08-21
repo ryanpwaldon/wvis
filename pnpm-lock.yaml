@@ -240,6 +240,9 @@ importers:
       '@sctv/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/typescript
+      dotenv-cli:
+        specifier: ^7.4.2
+        version: 7.4.2
       eslint:
         specifier: 'catalog:'
         version: 9.7.0

@@ -1,4 +1,4 @@
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
 import { CLOUDFLARE_R2_BUCKET_NAME } from '../constants'
 import { env } from '../env'
@@ -38,8 +38,10 @@ class StorageService {
       const command = new GetObjectCommand({ Bucket: CLOUDFLARE_R2_BUCKET_NAME, Key: `${dir}/jobInfo.json` })
       const response = await this.S3.send(command)
       if (!response.Body) throw new Error('No body in the response.')
-      return jobInfoSchema.parse(await response.Body.transformToString())
+      const responseText = await response.Body.transformToString()
+      return jobInfoSchema.parse(responseText)
     } catch (error) {
+      if (error instanceof NoSuchKey) return null
       console.error('Error fetching latest job info:', error)
       throw error
     }

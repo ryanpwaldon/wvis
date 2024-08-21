@@ -6,10 +6,11 @@
   "license": "MIT",
   "scripts": {
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "cron": "tsx ./src/index.ts",
+    "cron": "pnpm with-env tsx ./src/index.ts",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.635.0",
@@ -24,6 +25,7 @@
     "@sctv/eslint-config": "workspace:*",
     "@sctv/prettier-config": "workspace:*",
     "@sctv/tsconfig": "workspace:*",
+    "dotenv-cli": "^7.4.2",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"
