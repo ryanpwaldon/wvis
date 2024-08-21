@@ -3,14 +3,10 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "exports": {
-    ".": "./src/index.ts"
-  },
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "dev": "tsc",
+    "cron": "tsx ./src/index.ts",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
     "typecheck": "tsc --noEmit"
@@ -19,6 +15,7 @@
     "grib-ts": "github:ryanpwaldon/grib-ts",
     "jimp": "^0.22.12",
     "ky": "catalog:",
+    "tsx": "^4.17.0",
     "zod": "catalog:"
   },
   "devDependencies": {
