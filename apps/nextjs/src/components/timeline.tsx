@@ -21,21 +21,27 @@ export const Timeline = ({ onChange, days, interval }: TimelineProps) => {
   }, [dates, index, interval, onChange])
 
   return (
-    <Slider.Root
-      min={0}
-      max={dates.length - 1}
-      value={[index]}
-      onValueChange={(value) => setIndex(value[0] as unknown as number)}
-      className="relative flex h-10 w-full touch-none select-none items-center rounded-full border bg-background/60 backdrop-blur-xl"
-    >
-      {dates.map((_, i) => {
-        if (i % 24 !== 0) return
-        return (
-          <div key={i} className={cn('absolute h-1 w-1 -translate-x-1/2 rounded-full bg-red-100')} style={{ left: calcStepMarkOffset(i, dates.length - 1) }} />
-        )
-      })}
-      <Slider.Thumb className="block h-4 w-4 rounded-full border border-primary/50 bg-background focus-visible:outline-none" />
-    </Slider.Root>
+    <div className="relative w-full touch-none select-none rounded-full border bg-background/60 px-6 backdrop-blur-xl transition-all active:bg-background/80">
+      <Slider.Root
+        min={0}
+        max={dates.length - 1}
+        value={[index]}
+        onValueChange={(value) => setIndex(value[0] as unknown as number)}
+        className="relative flex w-full touch-none select-none items-center py-6"
+      >
+        {dates.map((_, i) => {
+          if (i % 24 !== 0) return
+          return (
+            <div
+              key={i}
+              className={cn('absolute h-1 w-1 -translate-x-1/2 rounded-full bg-primary/30')}
+              style={{ left: calcStepMarkOffset(i, dates.length - 1) }}
+            />
+          )
+        })}
+        <Slider.Thumb className="block h-4 w-4 rounded-full border border-primary/50 bg-background focus-visible:outline-none" />
+      </Slider.Root>
+    </div>
   )
 }
 
