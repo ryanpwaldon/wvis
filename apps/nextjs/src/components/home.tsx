@@ -17,12 +17,14 @@ export const Home = () => {
 
   return (
     <div className="h-full w-full p-4">
-      <div className="flex h-full w-full flex-col divide-y overflow-hidden border">
+      <div className="flex h-full w-full flex-col overflow-hidden border">
         <Mapbox>
           <MapboxParticleLayer imageData={imageData} />
           <MapboxChoroplethLayer imageData={imageData} />
         </Mapbox>
-        <Timeline interval={3} days={7} onChange={setSelectedDate} />
+        <div className="absolute bottom-0 left-0 w-full p-4">
+          <Timeline onChange={setSelectedDate} interval={3} days={7} />
+        </div>
       </div>
     </div>
   )
