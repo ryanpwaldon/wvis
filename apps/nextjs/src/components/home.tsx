@@ -16,8 +16,8 @@ export const Home = () => {
   const { imageData } = useImageData(selectedImageUrl)
 
   return (
-    <div className="h-full w-full p-4">
-      <div className="flex h-full w-full flex-col overflow-hidden border">
+    <div className="h-full w-full">
+      <div className="relative h-full w-full overflow-hidden">
         <Mapbox>
           <MapboxParticleLayer imageData={imageData} />
           <MapboxChoroplethLayer imageData={imageData} />
