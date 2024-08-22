@@ -21,7 +21,7 @@ export const Timeline = ({ onChange, days, interval }: TimelineProps) => {
   }, [dates, index, interval, onChange])
 
   return (
-    <div className="relative w-full touch-none select-none rounded-full border bg-background/60 px-6 backdrop-blur-xl transition-all active:bg-background/80">
+    <div className="relative w-full touch-none select-none rounded-full border bg-background/60 px-6 backdrop-blur-xl active:bg-background/80">
       <Slider.Root
         min={0}
         max={dates.length - 1}

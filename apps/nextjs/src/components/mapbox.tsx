@@ -1,8 +1,9 @@
 'use client'
 
 import type { StyleSpecification } from 'mapbox-gl'
-import React, { createContext, useEffect, useRef, useState } from 'react'
+import React, { createContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Map } from 'mapbox-gl'
+import { useTheme } from 'next-themes'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 
@@ -19,9 +20,11 @@ interface MapboxProps {
 export const MapboxContext = createContext<Map | null>(null)
 
 export const Mapbox = ({ className, children }: MapboxProps) => {
+  const { theme } = useTheme()
   const mapRef = useRef<Map | null>(null)
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const [isMapReady, setIsMapReady] = useState(false)
+  const mapStyle = useMemo(() => (theme === 'light' ? mapboxStyle('light') : mapboxStyle('dark')), [theme])
 
   useEffect(() => {
     if (!mapRef.current && mapContainerRef.current) {
@@ -31,7 +34,7 @@ export const Mapbox = ({ className, children }: MapboxProps) => {
         attributionControl: false,
         projection: { name: 'mercator' },
         container: mapContainerRef.current,
-        style: mapboxStyle as StyleSpecification,
+        style: mapStyle as StyleSpecification,
         accessToken: env.NEXT_PUBLIC_MAPBOX_API_KEY,
       })
       mapRef.current.on('load', () => setIsMapReady(true))
@@ -42,7 +45,10 @@ export const Mapbox = ({ className, children }: MapboxProps) => {
         mapRef.current = null
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => void mapRef.current?.setStyle(mapStyle as StyleSpecification), [mapStyle])
 
   return (
     <div className={cn('relative h-full w-full bg-background [&_.mapboxgl-map_.mapboxgl-ctrl-logo]:!hidden [&_canvas]:!outline-none', className)}>
