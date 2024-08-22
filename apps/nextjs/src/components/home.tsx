@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react'
 
 import { CLOUDFLARE_BUCKET_URL } from '@sctv/constants'
-import { ThemeToggle } from '@sctv/ui/theme'
 
 import { Mapbox } from '~/components/mapbox'
 import useImageData from '~/hooks/useImageData'
@@ -19,9 +18,6 @@ export const Home = () => {
   return (
     <div className="h-full w-full border p-4">
       <div className="relative h-full w-full overflow-hidden">
-        <div className="absolute left-0 top-0 z-10">
-          <ThemeToggle />
-        </div>
         <Mapbox>
           <MapboxParticleLayer imageData={imageData} />
           <MapboxChoroplethLayer imageData={imageData} />
