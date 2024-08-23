@@ -3,6 +3,7 @@ import { Martian_Mono as FontMono } from 'next/font/google'
 
 import { cn } from '@sctv/ui'
 import { ThemeProvider } from '@sctv/ui/theme'
+import { TooltipProvider } from '@sctv/ui/tooltip'
 
 import { TRPCReactProvider } from '~/trpc/react'
 
@@ -31,9 +32,11 @@ export const viewport: Viewport = {
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html className="h-full w-full" lang="en" suppressHydrationWarning>
-      <body className={cn('fixed left-0 top-0 h-full w-full bg-background font-mono text-xs text-foreground antialiased', fontMono.variable)}>
+      <body className={cn('fixed left-0 top-0 h-full w-full bg-background font-mono text-xs font-light text-foreground antialiased', fontMono.variable)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <TRPCReactProvider>{props.children}</TRPCReactProvider>
+          <TooltipProvider>
+            <TRPCReactProvider>{props.children}</TRPCReactProvider>
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>
