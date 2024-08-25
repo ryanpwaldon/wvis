@@ -21,10 +21,10 @@ const getLatestJob = async () => {
 
 const getLatestRun = async () => {
   const dateStrsHtml = await ky('https://nomads.ncep.noaa.gov/dods/wave/gfswave/').text()
-  const dateStrs = [...new Set([...dateStrsHtml.matchAll(/gfs(\d{8})\/:/g)].map((i) => i[1]).filter(isDefined).reverse())] // prettier-ignore
+  const dateStrs = [...new Set([...dateStrsHtml.matchAll(/<b>\d+: (\d{8})\/:<\/b>/g)].map((i) => i[1]).filter(isDefined).reverse())] // prettier-ignore
   for (const dateStr of dateStrs) {
     const hourStrsHtml = await ky(`https://nomads.ncep.noaa.gov/dods/wave/gfswave/${dateStr}`).text()
-    const hourStr = [...new Set([...hourStrsHtml.matchAll(/gfs_0p25_(\d{2})z(?!_anl)/g)].map((i) => i[1]).filter(isDefined).reverse())][0] // prettier-ignore
+    const hourStr = [...new Set([...hourStrsHtml.matchAll(/gfswave.global.0p25_(\d{2})z/g)].map((i) => i[1]).filter(isDefined).reverse())][0] // prettier-ignore
     if (hourStr) return { dateStr, hourStr }
   }
   throw new Error('No valid hours found for any date.')
@@ -41,29 +41,43 @@ const getUrl = (dateStr: string, hourStr: string, timeIndex: number) => {
 }
 
 export const run = async () => {
+  console.log('Starting waves tiles update...')
+  console.log('Fetching latest run date...')
   const { dateStr, hourStr } = await getLatestRun()
   const latestRunDate = dateFromParts(dateStr, hourStr)
+  console.log('Latest run date:', dateStr, hourStr, latestRunDate)
+  console.log('Fetching latest job date...')
   const latestJobDate = await getLatestJob()
+  console.log('Latest job date:', latestJobDate)
   if (latestJobDate === latestRunDate.toISOString()) return console.log('Waves tiles up to date.')
   const schedule = generateSchedule(latestRunDate, 8)
+  console.log('Generated schedule:', schedule)
   for (const [timeIndex, date] of schedule) {
+    console.log(`Processing time index: ${timeIndex}, date: ${date.toISOString()}`)
     const url = getUrl(dateStr, hourStr, timeIndex)
+    console.log(`Generated URL for time index: ${timeIndex}`, url)
     const data = await ky(url).text()
+    console.log('Data fetched time index:', timeIndex)
     const wavesDirectionHeightTuples = zip(parse(data, wavesDirectionKey), parse(data, wavesHeightKey))
+    console.log('Parsed waves direction and height data for time index:', timeIndex)
     const wavesU = wavesDirectionHeightTuples.map(([degrees, magnitude]) => componentsToU(degrees, magnitude))
     const wavesV = wavesDirectionHeightTuples.map(([degrees, magnitude]) => componentsToV(degrees, magnitude))
+    console.log(`Computed U and V components time index ${timeIndex}`)
     const buffer = await generateFlowFieldImage({
       uValues: wavesU,
       vValues: wavesV,
       width: 360,
-      height: 180,
-      minMagnitude: 15,
+      height: 181,
+      minMagnitude: -15,
       maxMagnitude: 15,
       xOffset: 180,
     })
+    console.log('Image buffer generated time index:', timeIndex)
     await storageService.uploadImage(buffer, 'waves', `${date.toISOString()}.png`)
+    console.log('Image uploaded date:', date)
   }
   const jobInfo = JSON.stringify({ modelRunDate: latestRunDate })
   await storageService.putJson('waves/jobInfo.json', jobInfo)
+  console.log('Job info updated with latest run date.')
   console.log('Waves tiles updated.')
 }

@@ -23,7 +23,8 @@ export const generateFlowFieldImage = async ({
   const image = new jimp(width, height, 0x00000000)
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const adjustedX = (x + xOffset) % width
+      const adjustedX = (x + xOffset) % width // align start with intl date line
+      const adjustedY = height - y - 1 // invert y-axis
       const index = y * width + x
       const u = uValues[index]
       const v = vValues[index]
@@ -36,7 +37,7 @@ export const generateFlowFieldImage = async ({
       const green = Math.floor(((clampedVgrdValue + 100) / 200) * 255)
       // Combine red and green values into one pixel
       const color = jimp.rgbaToInt(red, green, 0, 255)
-      image.setPixelColor(color, adjustedX, y)
+      image.setPixelColor(color, adjustedX, adjustedY)
     }
   }
   return await image.getBufferAsync(jimp.MIME_PNG)
