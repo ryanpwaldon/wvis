@@ -1,9 +1,7 @@
 import { GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
-import type { JobInfo } from '../validators'
 import { CLOUDFLARE_R2_BUCKET_NAME } from '../constants'
 import { env } from '../env'
-import { jobInfoSchema } from '../validators'
 
 class StorageService {
   private S3: S3Client
@@ -34,37 +32,31 @@ class StorageService {
     }
   }
 
-  async getLatestJobInfo(dir: string) {
+  async getJson(key: string) {
     try {
-      const command = new GetObjectCommand({ Bucket: CLOUDFLARE_R2_BUCKET_NAME, Key: `${dir}/jobInfo.json` })
+      const command = new GetObjectCommand({ Bucket: CLOUDFLARE_R2_BUCKET_NAME, Key: key })
       const response = await this.S3.send(command)
       if (!response.Body) throw new Error('No body in the response.')
-      const responseText = await response.Body.transformToString()
-      const responseData = JSON.parse(responseText) as unknown
-      return jobInfoSchema.parse(responseData)
+      const text = await response.Body.transformToString()
+      return JSON.parse(text) as unknown
     } catch (error) {
       if (error instanceof NoSuchKey) return null
-      console.error('Error fetching latest job info:', error)
+      console.error(`Error fetching file ${key}:`, error)
       throw error
     }
   }
 
-  async updateJobInfo(dir: string, jobInfo: JobInfo) {
+  async putJson(key: string, json: string) {
     try {
-      const validJobInfo = jobInfoSchema.parse(jobInfo)
-      const jobInfoString = JSON.stringify(validJobInfo)
-
       const command = new PutObjectCommand({
         Bucket: CLOUDFLARE_R2_BUCKET_NAME,
-        Key: `${dir}/jobInfo.json`,
-        Body: jobInfoString,
+        Key: key,
+        Body: json,
         ContentType: 'application/json',
       })
-
       await this.S3.send(command)
-      console.log('Job info updated successfully:', `${dir}/jobInfo.json`)
     } catch (error) {
-      console.error('Error updating job info:', error)
+      console.error('Error updating json:', error)
       throw error
     }
   }

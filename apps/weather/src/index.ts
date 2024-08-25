@@ -1,7 +1,9 @@
-import { processWind } from './tasks/wind'
+import { run as runWaves } from './tasks/waves'
+import { run as runWind } from './tasks/wind'
 
 const main = async () => {
-  await processWind()
+  await runWind()
+  await runWaves()
 }
 
 await main()

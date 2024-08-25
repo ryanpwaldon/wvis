@@ -1,16 +1,10 @@
 import { z } from 'zod'
 
-export const modelRunDateSchema = z.string().regex(/^\d{8}$/)
-export type ModelRunDate = z.infer<typeof modelRunDateSchema>
+export const dateStrSchema = z.string().regex(/^\d{8}$/)
+export type DateStr = z.infer<typeof dateStrSchema>
 
-export const modelRunHourSchema = z.enum(['00', '06', '12', '18'])
-export type ModelRunHour = z.infer<typeof modelRunHourSchema>
+export const hourStrSchema = z.enum(['00', '06', '12', '18'])
+export type HourStr = z.infer<typeof hourStrSchema>
 
-export const modelForecaseHourSchema = z.string().regex(/^\d{3}$/)
-export type ModelForecastHour = z.infer<typeof modelForecaseHourSchema>
-
-export const jobInfoSchema = z.object({
-  modelRunDate: modelRunDateSchema,
-  modelRunHour: modelRunHourSchema,
-})
+export const jobInfoSchema = z.object({ modelRunDate: z.string().datetime() })
 export type JobInfo = z.infer<typeof jobInfoSchema>
