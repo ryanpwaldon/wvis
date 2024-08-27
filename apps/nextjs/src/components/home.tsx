@@ -3,7 +3,10 @@
 import { useMemo, useRef, useState } from 'react'
 import { format, formatDistanceToNow } from 'date-fns'
 
-import { CLOUDFLARE_BUCKET_URL } from '@sctv/shared'
+import type { WeatherLayerId } from '@sctv/shared'
+import { WEATHER_LAYERS } from '@sctv/shared'
+import { Button } from '@sctv/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@sctv/ui/dropdown-menu'
 import { ThemeToggle } from '@sctv/ui/theme'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@sctv/ui/tooltip'
 
@@ -14,9 +17,11 @@ import { MapboxParticleLayer } from './mapbox-particle-layer'
 import { Timeline } from './timeline'
 
 export const Home = () => {
+  const [selectedWeatherLayerId, setSelectedWeatherLayerId] = useState<WeatherLayerId>('wind')
+  const selectedLayer = useMemo(() => WEATHER_LAYERS[selectedWeatherLayerId], [selectedWeatherLayerId])
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const selectedImageUrl = useMemo(() => selectedDate && `${CLOUDFLARE_BUCKET_URL}/wind/${selectedDate.toISOString()}.png`, [selectedDate])
-  const { imageData } = useImageData(selectedImageUrl)
+  const layerImage = useMemo(() => selectedDate && selectedLayer.imageUrlTemplate(selectedDate), [selectedDate, selectedLayer])
+  const { imageData } = useImageData(layerImage)
   const boundaryRef = useRef<HTMLDivElement | null>(null)
 
   return (
@@ -37,6 +42,22 @@ export const Home = () => {
                 Updated {format(new Date(), 'EEEE d MMMM h:mm a')}
               </TooltipContent>
             </Tooltip>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="h-8 border-r px-2 text-xs font-light" variant="ghost">
+                  Layer
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent sideOffset={2} align="end">
+                <DropdownMenuRadioGroup value={selectedWeatherLayerId} onValueChange={setSelectedWeatherLayerId as (value: string) => void}>
+                  {Object.values(WEATHER_LAYERS).map((layer) => (
+                    <DropdownMenuRadioItem key={layer.id} value={layer.id}>
+                      {layer.title}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <ThemeToggle />
           </div>
         </div>
