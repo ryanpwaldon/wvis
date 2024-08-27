@@ -19,7 +19,8 @@
     "jimp": "^0.22.12",
     "ky": "catalog:",
     "tsx": "^4.17.0",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@sctv/constants": "workspace:*"
   },
   "devDependencies": {
     "@sctv/eslint-config": "workspace:*",

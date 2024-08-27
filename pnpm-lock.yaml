@@ -218,6 +218,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.635.0
         version: 3.635.0
+      '@sctv/constants':
+        specifier: workspace:*
+        version: link:../../packages/constants
       '@t3-oss/env-core':
         specifier: ^0.10.1
         version: 0.10.1(typescript@5.5.3)(zod@3.23.8)
@@ -532,7 +535,7 @@ importers:
         version: 7.35.0(eslint@9.7.0)
       eslint-plugin-react-hooks:
         specifier: rc
-        version: 5.1.0-rc-1d989965-20240821(eslint@9.7.0)
+        version: 5.1.0-rc-b57d2823-20240822(eslint@9.7.0)
       eslint-plugin-turbo:
         specifier: ^2.0.8
         version: 2.0.8(eslint@9.7.0)
@@ -3888,8 +3891,8 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
 
-  eslint-plugin-react-hooks@5.1.0-rc-1d989965-20240821:
-    resolution: {integrity: sha512-oGk2ScQjiE7cW6naW23S2XKyIP0BJgBhxtwAC1r68VCKpbORS3kW0l+M5FoJc86V+eZqxnYzezpz9dArD1Jg0w==}
+  eslint-plugin-react-hooks@5.1.0-rc-b57d2823-20240822:
+    resolution: {integrity: sha512-YY9FJcnmCAA/DVWYjm7TBcgKDWZGtrIzL2BrddxM705RTZog56zdu4G0//d1W9TZV3mQkDratfjtH/tMTaL5Gw==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -10080,7 +10083,7 @@ snapshots:
       safe-regex-test: 1.0.3
       string.prototype.includes: 2.0.0
 
-  eslint-plugin-react-hooks@5.1.0-rc-1d989965-20240821(eslint@9.7.0):
+  eslint-plugin-react-hooks@5.1.0-rc-b57d2823-20240822(eslint@9.7.0):
     dependencies:
       eslint: 9.7.0
 

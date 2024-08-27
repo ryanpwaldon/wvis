@@ -1,6 +1,7 @@
 import { GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
-import { CLOUDFLARE_R2_BUCKET_NAME } from '../constants'
+import { CLOUDFLARE_BUCKET_NAME } from '@sctv/constants'
+
 import { env } from '../env'
 
 class StorageService {
@@ -20,7 +21,7 @@ class StorageService {
   async uploadImage(buffer: Buffer, dir: string, name: string) {
     try {
       const command = new PutObjectCommand({
-        Bucket: CLOUDFLARE_R2_BUCKET_NAME,
+        Bucket: CLOUDFLARE_BUCKET_NAME,
         Key: `${dir}/${name}`,
         Body: buffer,
         ContentType: 'image/png',
@@ -34,7 +35,7 @@ class StorageService {
 
   async getJson(key: string) {
     try {
-      const command = new GetObjectCommand({ Bucket: CLOUDFLARE_R2_BUCKET_NAME, Key: key })
+      const command = new GetObjectCommand({ Bucket: CLOUDFLARE_BUCKET_NAME, Key: key })
       const response = await this.S3.send(command)
       if (!response.Body) throw new Error('No body in the response.')
       const text = await response.Body.transformToString()
@@ -49,7 +50,7 @@ class StorageService {
   async putJson(key: string, json: string) {
     try {
       const command = new PutObjectCommand({
-        Bucket: CLOUDFLARE_R2_BUCKET_NAME,
+        Bucket: CLOUDFLARE_BUCKET_NAME,
         Key: key,
         Body: json,
         ContentType: 'application/json',
