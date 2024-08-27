@@ -36,7 +36,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@sctv/constants": "workspace:*",
+    "@sctv/shared": "workspace:*",
     "@sctv/eslint-config": "workspace:*",
     "@sctv/prettier-config": "workspace:*",
     "@sctv/tailwind-config": "workspace:*",

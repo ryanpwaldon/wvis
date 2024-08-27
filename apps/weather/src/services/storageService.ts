@@ -1,6 +1,6 @@
 import { GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
-import { CLOUDFLARE_BUCKET_NAME } from '@sctv/constants'
+import { CLOUDFLARE_BUCKET_NAME } from '@sctv/shared'
 
 import { env } from '../env'
 

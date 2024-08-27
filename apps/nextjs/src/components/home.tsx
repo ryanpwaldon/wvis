@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { format, formatDistanceToNow } from 'date-fns'
 
-import { CLOUDFLARE_BUCKET_URL } from '@sctv/constants'
+import { CLOUDFLARE_BUCKET_URL } from '@sctv/shared'
 import { ThemeToggle } from '@sctv/ui/theme'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@sctv/ui/tooltip'
 

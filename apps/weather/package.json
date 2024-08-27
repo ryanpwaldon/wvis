@@ -20,7 +20,7 @@
     "ky": "catalog:",
     "tsx": "^4.17.0",
     "zod": "catalog:",
-    "@sctv/constants": "workspace:*"
+    "@sctv/shared": "workspace:*"
   },
   "devDependencies": {
     "@sctv/eslint-config": "workspace:*",
