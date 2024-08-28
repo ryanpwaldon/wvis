@@ -94,13 +94,12 @@ export const fParticlesUpdate = /* glsl */ `
   uniform float u_random_seed;
   varying vec2 v_tex_pos;
 
-  const vec3 rand_constants = vec3(12.9898, 78.233, 4375.85453);
   float rand(const vec2 co) {
-    float t = dot(rand_constants.xy, co);
-    return fract(sin(t) * (rand_constants.z + t));
+    float t = dot(vec2(12.9898, 78.233), co);
+    return fract(sin(t) * (4375.85453 + t));
   }
 
-  vec2 lookup_vector(const vec2 uv) {
+  vec2 getVelocity(const vec2 uv) {
     vec2 px = 1.0 / u_flow_field_res;
     vec2 vc = (floor(uv * u_flow_field_res)) * px;
     vec2 f = fract(uv * u_flow_field_res);
@@ -130,8 +129,8 @@ export const fParticlesUpdate = /* glsl */ `
     float lat = coordinate.y;
     float lon_domain = u_flow_field_geo_bounds.z - u_flow_field_geo_bounds.x;
     float lat_domain = u_flow_field_geo_bounds.w - u_flow_field_geo_bounds.y;
-    vec2 pos_lookup = vec2((lon - u_flow_field_geo_bounds.x) / lon_domain, (lat - u_flow_field_geo_bounds.y) / lat_domain);
-    vec2 velocity = mix(u_flow_field_min_speed, u_flow_field_max_speed, lookup_vector(pos_lookup));
+    vec2 velocity_pos = vec2((lon - u_flow_field_geo_bounds.x) / lon_domain, (lat - u_flow_field_geo_bounds.y) / lat_domain);
+    vec2 velocity = mix(u_flow_field_min_speed, u_flow_field_max_speed, getVelocity(velocity_pos));
     float speed_t = length(velocity) / length(u_flow_field_max_speed);
     vec2 offset = vec2(velocity.x, -velocity.y) * 0.0001 * u_speed_factor;
     pos = fract(1.0 + pos + offset);
