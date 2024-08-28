@@ -10,7 +10,7 @@ export const vQuad = /* glsl */ `
   varying vec2 v_tex_pos;
   void main() {
     v_tex_pos = a_pos;
-    gl_Position = vec4(1.0 - 2.0 * a_pos, 0, 1);
+    gl_Position = vec4(2.0 * a_pos - 1.0, 0, 1);
   }
 `
 
@@ -22,25 +22,27 @@ export const fScreenDraw = /* glsl */ `
   uniform float u_opacity;
   varying vec2 v_tex_pos;
   void main() {
-    vec4 color = texture2D(u_screen, 1.0 - v_tex_pos);
+    vec4 color = texture2D(u_screen, v_tex_pos); // get color from screen texture pixel (previous frame)
     // a hack to guarantee opacity fade out even with a value close to 1.0
-    gl_FragColor = vec4(floor(255.0 * color * u_opacity) / 255.0);
+    gl_FragColor = vec4(floor(255.0 * color * u_opacity) / 255.0); // make color slightly more transparent
   }
 `
 
 // Returns particle pixels
 export const vParticlesDraw = /* glsl */ `
   precision highp float;
-  attribute float a_particle_index;
-  uniform sampler2D u_particles;
-  uniform float u_particles_res;
-  varying vec2 v_particle_pos;
-
+  attribute float a_particle_index; // index of pixel in particle state square texture
+  uniform sampler2D u_particles; // particle state square texture
+  uniform float u_particles_res; // a side of the particle state square texture (e.g. for 256x256, res = 256)
   void main() {
+    // find color in particle state square texture using index + particle state res as inputs
     vec4 color = texture2D(u_particles, vec2(fract(a_particle_index / u_particles_res), floor(a_particle_index / u_particles_res) / u_particles_res));
-    v_particle_pos = vec2(color.r / 255.0 + color.b, color.g / 255.0 + color.a);
+    // convert color to x,y position, normalised between 0 and 1
+    vec2 pos = vec2(color.r / 255.0 + color.b, color.g / 255.0 + color.a);
+    // set particle size
     gl_PointSize = 2.0;
-    gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, 1.0 - 2.0 * v_particle_pos.y, 0, 1);
+    // normalise between -1 and 1. and, flip the y axis
+    gl_Position = vec4(2.0 * pos.x - 1.0, 1.0 - 2.0 * pos.y, 0, 1);
   }
 `
 
@@ -48,31 +50,8 @@ export const vParticlesDraw = /* glsl */ `
 // Draws all particles
 export const fParticlesDraw = /* glsl */ `
   precision highp float;
-  uniform sampler2D u_flow_field;
-  uniform vec2 u_flow_field_min_speed;
-  uniform vec2 u_flow_field_max_speed;
-  uniform vec4 u_flow_field_geo_bounds;
-  uniform vec4 u_map_mercator_bounds;
-  varying vec2 v_particle_pos;
-
-  vec2 returnLonLat(float x_domain, float y_domain, vec2 pos) {
-    float mercator_x = fract(u_map_mercator_bounds.x + pos.x * x_domain);
-    float mercator_y = u_map_mercator_bounds.w + pos.y * y_domain;
-    float lon = mercator_x * 360.0 - 180.0;
-    float lat2 = 180.0 - mercator_y * 360.0;
-    float lat = 90.0 - (360.0 / 3.141592654 * atan(exp(lat2 * 3.141592654/180.0)));
-    return vec2(lon, lat);
-  }
 
   void main() {
-    float x_domain = abs(u_map_mercator_bounds.x - u_map_mercator_bounds.z);
-    float y_domain = abs(u_map_mercator_bounds.y - u_map_mercator_bounds.w);
-    vec2 coordinate = returnLonLat(x_domain, y_domain, v_particle_pos);
-    float lon = coordinate.x;
-    float lat = coordinate.y;
-    if (lat > u_flow_field_geo_bounds.w || lat < u_flow_field_geo_bounds.y || lon > u_flow_field_geo_bounds.z || lon < u_flow_field_geo_bounds.x) {
-      discard;
-    }
     gl_FragColor = vec4(1.0, 1.0, 1.0, 0.33);
   }
 `
@@ -306,13 +285,8 @@ class ParticleRenderer {
     const particleAttributes = { a_particle_index: { numComponents: 1, data: this.particleIndexArray } }
     const particleBufferInfo = createBufferInfoFromArrays(this.gl, particleAttributes)
     const particleUniforms = {
-      u_flow_field: this.renderTextures.vectorFieldTexture,
       u_particles: this.particleTextures.particleTextureSource,
       u_particles_res: this.particleTextureResolution,
-      u_flow_field_min_speed: [this.VECTOR_MAGNITUDE_RANGE[0], this.VECTOR_MAGNITUDE_RANGE[0]],
-      u_flow_field_max_speed: [this.VECTOR_MAGNITUDE_RANGE[1], this.VECTOR_MAGNITUDE_RANGE[1]],
-      u_map_mercator_bounds: this.mapViewportBounds,
-      u_flow_field_geo_bounds: this.LONGITUDE_LATITUDE_BOUNDS,
     }
     setBuffersAndAttributes(this.gl, this.particlesDrawProgram, particleBufferInfo)
     setUniforms(this.particlesDrawProgram, particleUniforms)
