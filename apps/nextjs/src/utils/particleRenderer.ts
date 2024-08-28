@@ -65,7 +65,6 @@ export const fParticlesUpdate = /* glsl */ `
   uniform vec2 u_flow_field_res;
   uniform vec2 u_flow_field_min_speed;
   uniform vec2 u_flow_field_max_speed;
-  uniform vec4 u_flow_field_geo_bounds;
   uniform vec4 u_map_mercator_bounds;
   uniform float u_speed_factor;
   uniform float u_drop_rate;
@@ -89,34 +88,43 @@ export const fParticlesUpdate = /* glsl */ `
     return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y); // interpolate all 4 using remainder
   }
 
-  vec2 returnLonLat(float x_domain, float y_domain, vec2 pos) {
+  vec2 getLngLat(float x_domain, float y_domain, vec2 pos) {
     float mercator_x = fract(u_map_mercator_bounds.x + pos.x * x_domain);
     float mercator_y = u_map_mercator_bounds.w + pos.y * y_domain;
-    float lon = mercator_x * 360.0 - 180.0;
+    float lng = mercator_x * 360.0 - 180.0;
     float lat2 = 180.0 - mercator_y * 360.0;
     float lat = 90.0 - (360.0 / 3.141592654 * atan(exp(lat2 * 3.141592654/180.0)));
-    return vec2(lon, lat);
+    return vec2(lng, lat);
   }
 
   void main() {
+    // find color in particle state square texture
     vec4 color = texture2D(u_particles, v_tex_pos);
+    // convert color to x,y position, normalised between 0 and 1
     vec2 pos = vec2(color.r / 255.0 + color.b, color.g / 255.0 + color.a);
+    // get width
     float x_domain = abs(u_map_mercator_bounds.x - u_map_mercator_bounds.z);
+    // get height
     float y_domain = abs(u_map_mercator_bounds.y - u_map_mercator_bounds.w);
-    vec2 coordinate = returnLonLat(x_domain, y_domain, pos);
-    float lon = coordinate.x;
-    float lat = coordinate.y;
-    float lon_domain = u_flow_field_geo_bounds.z - u_flow_field_geo_bounds.x;
-    float lat_domain = u_flow_field_geo_bounds.w - u_flow_field_geo_bounds.y;
-    vec2 velocity_pos = vec2((lon - u_flow_field_geo_bounds.x) / lon_domain, (lat - u_flow_field_geo_bounds.y) / lat_domain);
-    vec2 velocity = mix(u_flow_field_min_speed, u_flow_field_max_speed, getVelocity(velocity_pos));
+    // get [lng, lat]
+    vec2 lngLat = getLngLat(x_domain, y_domain, pos);
+    float lng = lngLat.x;
+    float lat = lngLat.y;
+    // get flow field pos, by normalising between 0 and 1
+    vec2 flow_field_pos = vec2((lng + 180.0) / 360.0, (lat + 90.0) / 180.0);
+    // normalise velocity between -100 and 100 (e.g. [-91, 34])
+    vec2 velocity = mix(u_flow_field_min_speed, u_flow_field_max_speed, getVelocity(flow_field_pos));
+    // get speed by dividing vector length, by max speed length
     float speed_t = length(velocity) / length(u_flow_field_max_speed);
+    // get offset (distance to move particle). we must flip y to account for differing coordinate systems
     vec2 offset = vec2(velocity.x, -velocity.y) * 0.0001 * u_speed_factor;
+    // update pos with offset
     pos = fract(1.0 + pos + offset);
     vec2 seed = (pos + v_tex_pos) * u_random_seed;
     float drop_rate = u_drop_rate + speed_t * u_drop_rate_bump;
     float drop = step(1.0 - drop_rate, rand(seed));
     vec2 random_pos = vec2(rand(seed + 1.3), rand(seed + 2.1));
+    // randomly reset position
     pos = mix(pos, random_pos, drop);
     gl_FragColor = vec4(fract(pos * 255.0), floor(pos * 255.0) / 255.0);
   }
@@ -134,7 +142,6 @@ interface ParticleTextures {
 }
 
 class ParticleRenderer {
-  private readonly LONGITUDE_LATITUDE_BOUNDS = [-180, -90, 180, 90] as const
   private readonly VECTOR_MAGNITUDE_RANGE = [-100, 100] as const
   private readonly PARTICLE_FADE_RATE = 0.985
   private readonly PARTICLE_SPEED_FACTOR = 0.3
@@ -317,7 +324,6 @@ class ParticleRenderer {
       u_drop_rate: this.PARTICLE_DROP_RATE,
       u_drop_rate_bump: this.PARTICLE_DROP_RATE_INCREASE,
       u_map_mercator_bounds: this.mapViewportBounds,
-      u_flow_field_geo_bounds: this.LONGITUDE_LATITUDE_BOUNDS,
     }
     const quadBufferInfo = createBufferInfoFromArrays(this.gl, quadVertices)
     setBuffersAndAttributes(this.gl, this.particlesUpdateProgram, quadBufferInfo)
