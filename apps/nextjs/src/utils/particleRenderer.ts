@@ -31,13 +31,13 @@ export const fScreenDraw = /* glsl */ `
 // Returns particle pixels
 export const vParticlesDraw = /* glsl */ `
   precision highp float;
-  attribute float a_index;
+  attribute float a_particle_index;
   uniform sampler2D u_particles;
   uniform float u_particles_res;
   varying vec2 v_particle_pos;
 
   void main() {
-    vec4 color = texture2D(u_particles, vec2(fract(a_index / u_particles_res), floor(a_index / u_particles_res) / u_particles_res));
+    vec4 color = texture2D(u_particles, vec2(fract(a_particle_index / u_particles_res), floor(a_particle_index / u_particles_res) / u_particles_res));
     v_particle_pos = vec2(color.r / 255.0 + color.b, color.g / 255.0 + color.a);
     gl_PointSize = 2.0;
     gl_Position = vec4(2.0 * v_particle_pos.x - 1.0, 1.0 - 2.0 * v_particle_pos.y, 0, 1);
@@ -48,16 +48,16 @@ export const vParticlesDraw = /* glsl */ `
 // Draws all particles
 export const fParticlesDraw = /* glsl */ `
   precision highp float;
-  uniform sampler2D u_vector;
-  uniform vec2 u_vector_min;
-  uniform vec2 u_vector_max;
-  uniform vec4 u_bounds;
-  uniform vec4 u_data_bounds;
+  uniform sampler2D u_flow_field;
+  uniform vec2 u_flow_field_min_speed;
+  uniform vec2 u_flow_field_max_speed;
+  uniform vec4 u_flow_field_geo_bounds;
+  uniform vec4 u_map_mercator_bounds;
   varying vec2 v_particle_pos;
 
   vec2 returnLonLat(float x_domain, float y_domain, vec2 pos) {
-    float mercator_x = fract(u_bounds.x + pos.x * x_domain);
-    float mercator_y = u_bounds.w + pos.y * y_domain;
+    float mercator_x = fract(u_map_mercator_bounds.x + pos.x * x_domain);
+    float mercator_y = u_map_mercator_bounds.w + pos.y * y_domain;
     float lon = mercator_x * 360.0 - 180.0;
     float lat2 = 180.0 - mercator_y * 360.0;
     float lat = 90.0 - (360.0 / 3.141592654 * atan(exp(lat2 * 3.141592654/180.0)));
@@ -65,12 +65,12 @@ export const fParticlesDraw = /* glsl */ `
   }
 
   void main() {
-    float x_domain = abs(u_bounds.x - u_bounds.z);
-    float y_domain = abs(u_bounds.y - u_bounds.w);
+    float x_domain = abs(u_map_mercator_bounds.x - u_map_mercator_bounds.z);
+    float y_domain = abs(u_map_mercator_bounds.y - u_map_mercator_bounds.w);
     vec2 coordinate = returnLonLat(x_domain, y_domain, v_particle_pos);
     float lon = coordinate.x;
     float lat = coordinate.y;
-    if (lat > u_data_bounds.w || lat < u_data_bounds.y || lon > u_data_bounds.z || lon < u_data_bounds.x) {
+    if (lat > u_flow_field_geo_bounds.w || lat < u_flow_field_geo_bounds.y || lon > u_flow_field_geo_bounds.z || lon < u_flow_field_geo_bounds.x) {
       discard;
     }
     gl_FragColor = vec4(1.0, 1.0, 1.0, 0.33);
@@ -82,16 +82,16 @@ export const fParticlesDraw = /* glsl */ `
 export const fParticlesUpdate = /* glsl */ `
   precision highp float;
   uniform sampler2D u_particles;
-  uniform sampler2D u_vector;
-  uniform vec2 u_vector_res;
-  uniform vec2 u_vector_min;
-  uniform vec2 u_vector_max;
-  uniform float u_rand_seed;
+  uniform sampler2D u_flow_field;
+  uniform vec2 u_flow_field_res;
+  uniform vec2 u_flow_field_min_speed;
+  uniform vec2 u_flow_field_max_speed;
+  uniform vec4 u_flow_field_geo_bounds;
+  uniform vec4 u_map_mercator_bounds;
   uniform float u_speed_factor;
   uniform float u_drop_rate;
   uniform float u_drop_rate_bump;
-  uniform vec4 u_bounds;
-  uniform vec4 u_data_bounds;
+  uniform float u_random_seed;
   varying vec2 v_tex_pos;
 
   const vec3 rand_constants = vec3(12.9898, 78.233, 4375.85453);
@@ -101,19 +101,19 @@ export const fParticlesUpdate = /* glsl */ `
   }
 
   vec2 lookup_vector(const vec2 uv) {
-    vec2 px = 1.0 / u_vector_res;
-    vec2 vc = (floor(uv * u_vector_res)) * px;
-    vec2 f = fract(uv * u_vector_res);
-    vec2 tl = texture2D(u_vector, vc).rg;
-    vec2 tr = texture2D(u_vector, vc + vec2(px.x, 0)).rg;
-    vec2 bl = texture2D(u_vector, vc + vec2(0, px.y)).rg;
-    vec2 br = texture2D(u_vector, vc + px).rg;
+    vec2 px = 1.0 / u_flow_field_res;
+    vec2 vc = (floor(uv * u_flow_field_res)) * px;
+    vec2 f = fract(uv * u_flow_field_res);
+    vec2 tl = texture2D(u_flow_field, vc).rg;
+    vec2 tr = texture2D(u_flow_field, vc + vec2(px.x, 0)).rg;
+    vec2 bl = texture2D(u_flow_field, vc + vec2(0, px.y)).rg;
+    vec2 br = texture2D(u_flow_field, vc + px).rg;
     return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
   }
 
   vec2 returnLonLat(float x_domain, float y_domain, vec2 pos) {
-    float mercator_x = fract(u_bounds.x + pos.x * x_domain);
-    float mercator_y = u_bounds.w + pos.y * y_domain;
+    float mercator_x = fract(u_map_mercator_bounds.x + pos.x * x_domain);
+    float mercator_y = u_map_mercator_bounds.w + pos.y * y_domain;
     float lon = mercator_x * 360.0 - 180.0;
     float lat2 = 180.0 - mercator_y * 360.0;
     float lat = 90.0 - (360.0 / 3.141592654 * atan(exp(lat2 * 3.141592654/180.0)));
@@ -123,19 +123,19 @@ export const fParticlesUpdate = /* glsl */ `
   void main() {
     vec4 color = texture2D(u_particles, v_tex_pos);
     vec2 pos = vec2(color.r / 255.0 + color.b, color.g / 255.0 + color.a);
-    float x_domain = abs(u_bounds.x - u_bounds.z);
-    float y_domain = abs(u_bounds.y - u_bounds.w);
+    float x_domain = abs(u_map_mercator_bounds.x - u_map_mercator_bounds.z);
+    float y_domain = abs(u_map_mercator_bounds.y - u_map_mercator_bounds.w);
     vec2 coordinate = returnLonLat(x_domain, y_domain, pos);
     float lon = coordinate.x;
     float lat = coordinate.y;
-    float lon_domain = u_data_bounds.z - u_data_bounds.x;
-    float lat_domain = u_data_bounds.w - u_data_bounds.y;
-    vec2 pos_lookup = vec2((lon - u_data_bounds.x) / lon_domain, (lat - u_data_bounds.y) / lat_domain);
-    vec2 velocity = mix(u_vector_min, u_vector_max, lookup_vector(pos_lookup));
-    float speed_t = length(velocity) / length(u_vector_max);
+    float lon_domain = u_flow_field_geo_bounds.z - u_flow_field_geo_bounds.x;
+    float lat_domain = u_flow_field_geo_bounds.w - u_flow_field_geo_bounds.y;
+    vec2 pos_lookup = vec2((lon - u_flow_field_geo_bounds.x) / lon_domain, (lat - u_flow_field_geo_bounds.y) / lat_domain);
+    vec2 velocity = mix(u_flow_field_min_speed, u_flow_field_max_speed, lookup_vector(pos_lookup));
+    float speed_t = length(velocity) / length(u_flow_field_max_speed);
     vec2 offset = vec2(velocity.x, -velocity.y) * 0.0001 * u_speed_factor;
     pos = fract(1.0 + pos + offset);
-    vec2 seed = (pos + v_tex_pos) * u_rand_seed;
+    vec2 seed = (pos + v_tex_pos) * u_random_seed;
     float drop_rate = u_drop_rate + speed_t * u_drop_rate_bump;
     float drop = step(1.0 - drop_rate, rand(seed));
     vec2 random_pos = vec2(rand(seed + 1.3), rand(seed + 2.1));
@@ -304,16 +304,16 @@ class ParticleRenderer {
 
     // Render particles to screenTexture
     this.gl.useProgram(this.particlesDrawProgram.program)
-    const particleAttributes = { a_index: { numComponents: 1, data: this.particleIndexArray } }
+    const particleAttributes = { a_particle_index: { numComponents: 1, data: this.particleIndexArray } }
     const particleBufferInfo = createBufferInfoFromArrays(this.gl, particleAttributes)
     const particleUniforms = {
-      u_vector: this.renderTextures.vectorFieldTexture,
+      u_flow_field: this.renderTextures.vectorFieldTexture,
       u_particles: this.particleTextures.particleTextureSource,
       u_particles_res: this.particleTextureResolution,
-      u_vector_min: [this.VECTOR_MAGNITUDE_RANGE[0], this.VECTOR_MAGNITUDE_RANGE[0]],
-      u_vector_max: [this.VECTOR_MAGNITUDE_RANGE[1], this.VECTOR_MAGNITUDE_RANGE[1]],
-      u_bounds: this.mapViewportBounds,
-      u_data_bounds: this.LONGITUDE_LATITUDE_BOUNDS,
+      u_flow_field_min_speed: [this.VECTOR_MAGNITUDE_RANGE[0], this.VECTOR_MAGNITUDE_RANGE[0]],
+      u_flow_field_max_speed: [this.VECTOR_MAGNITUDE_RANGE[1], this.VECTOR_MAGNITUDE_RANGE[1]],
+      u_map_mercator_bounds: this.mapViewportBounds,
+      u_flow_field_geo_bounds: this.LONGITUDE_LATITUDE_BOUNDS,
     }
     setBuffersAndAttributes(this.gl, this.particlesDrawProgram, particleBufferInfo)
     setUniforms(this.particlesDrawProgram, particleUniforms)
@@ -334,17 +334,17 @@ class ParticleRenderer {
     this.gl.useProgram(this.particlesUpdateProgram.program)
     const quadVertices = { a_pos: { numComponents: 2, data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]) } }
     const updateUniforms = {
-      u_vector: this.renderTextures.vectorFieldTexture,
+      u_flow_field: this.renderTextures.vectorFieldTexture,
       u_particles: this.particleTextures.particleTextureSource,
-      u_vector_min: [this.VECTOR_MAGNITUDE_RANGE[0], this.VECTOR_MAGNITUDE_RANGE[0]],
-      u_vector_max: [this.VECTOR_MAGNITUDE_RANGE[1], this.VECTOR_MAGNITUDE_RANGE[1]],
-      u_rand_seed: Math.random(),
-      u_vector_res: [this.vectorFieldData.width, this.vectorFieldData.height],
+      u_flow_field_min_speed: [this.VECTOR_MAGNITUDE_RANGE[0], this.VECTOR_MAGNITUDE_RANGE[0]],
+      u_flow_field_max_speed: [this.VECTOR_MAGNITUDE_RANGE[1], this.VECTOR_MAGNITUDE_RANGE[1]],
+      u_random_seed: Math.random(),
+      u_flow_field_res: [this.vectorFieldData.width, this.vectorFieldData.height],
       u_speed_factor: this.PARTICLE_SPEED_FACTOR,
       u_drop_rate: this.PARTICLE_DROP_RATE,
       u_drop_rate_bump: this.PARTICLE_DROP_RATE_INCREASE,
-      u_bounds: this.mapViewportBounds,
-      u_data_bounds: this.LONGITUDE_LATITUDE_BOUNDS,
+      u_map_mercator_bounds: this.mapViewportBounds,
+      u_flow_field_geo_bounds: this.LONGITUDE_LATITUDE_BOUNDS,
     }
     const quadBufferInfo = createBufferInfoFromArrays(this.gl, quadVertices)
     setBuffersAndAttributes(this.gl, this.particlesUpdateProgram, quadBufferInfo)
