@@ -100,14 +100,14 @@ export const fParticlesUpdate = /* glsl */ `
   }
 
   vec2 getVelocity(const vec2 uv) {
-    vec2 px = 1.0 / u_flow_field_res;
-    vec2 vc = (floor(uv * u_flow_field_res)) * px;
-    vec2 f = fract(uv * u_flow_field_res);
-    vec2 tl = texture2D(u_flow_field, vc).rg;
-    vec2 tr = texture2D(u_flow_field, vc + vec2(px.x, 0)).rg;
-    vec2 bl = texture2D(u_flow_field, vc + vec2(0, px.y)).rg;
-    vec2 br = texture2D(u_flow_field, vc + px).rg;
-    return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
+    vec2 px = 1.0 / u_flow_field_res; // px = size of one pixel
+    vec2 vc = (floor(uv * u_flow_field_res)) * px; // vc = top left coord
+    vec2 f = fract(uv * u_flow_field_res); // f = remainder
+    vec2 tl = texture2D(u_flow_field, vc).rg; // top left
+    vec2 tr = texture2D(u_flow_field, vc + vec2(px.x, 0)).rg; // top right
+    vec2 bl = texture2D(u_flow_field, vc + vec2(0, px.y)).rg; // bottom left
+    vec2 br = texture2D(u_flow_field, vc + px).rg; // bottom right
+    return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y); // interpolate all 4 using remainder
   }
 
   vec2 returnLonLat(float x_domain, float y_domain, vec2 pos) {
