@@ -111,7 +111,7 @@ export const fParticlesUpdate = /* glsl */ `
     float lng = lngLat.x;
     float lat = lngLat.y;
     // get flow field pos, by normalising between 0 and 1
-    vec2 flow_field_pos = vec2((lng + 180.0) / 360.0, (lat + 90.0) / 180.0);
+    vec2 flow_field_pos = vec2(lng / 360.0, (lat + 90.0) / 180.0);
     // normalise velocity between -100 and 100 (e.g. [-91, 34])
     vec2 velocity = mix(u_flow_field_min_speed, u_flow_field_max_speed, getVelocity(flow_field_pos));
     // get speed by dividing vector length, by max speed length
@@ -134,6 +134,7 @@ interface RenderTextures {
   vectorFieldTexture: WebGLTexture
   backgroundTexture: WebGLTexture
   screenTexture: WebGLTexture
+  maskTexture: WebGLTexture
 }
 
 interface ParticleTextures {
@@ -184,6 +185,15 @@ class ParticleRenderer {
         height: this.vectorFieldData.height,
         format: this.gl.RGBA,
         src: this.vectorFieldData.data,
+      },
+      maskTexture: {
+        mag: this.gl.NEAREST,
+        min: this.gl.NEAREST,
+        width: this.gl.canvas.width,
+        height: this.gl.canvas.height,
+        format: this.gl.RGBA,
+        src: emptyTextureData,
+        wrap: this.gl.CLAMP_TO_EDGE,
       },
       backgroundTexture: {
         mag: this.gl.NEAREST,
@@ -293,6 +303,7 @@ class ParticleRenderer {
     const particleBufferInfo = createBufferInfoFromArrays(this.gl, particleAttributes)
     const particleUniforms = {
       u_particles: this.particleTextures.particleTextureSource,
+      u_mask: this.renderTextures.maskTexture,
       u_particles_res: this.particleTextureResolution,
     }
     setBuffersAndAttributes(this.gl, this.particlesDrawProgram, particleBufferInfo)
@@ -372,9 +383,11 @@ class ParticleRenderer {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT)
   }
 
-  public resizeTextures(): void {
+  public resizeTextures(imageData: ImageData): void {
     if (!this.renderTextures) return console.error('Render textures not initialized.')
     const emptyTextureData = new Uint8Array(this.gl.canvas.width * this.gl.canvas.height * 4)
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.renderTextures.maskTexture)
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.canvas.width, this.gl.canvas.height, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, imageData)
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.renderTextures.backgroundTexture)
     this.gl.texImage2D(
       this.gl.TEXTURE_2D,

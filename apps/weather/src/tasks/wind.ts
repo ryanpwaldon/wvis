@@ -64,7 +64,6 @@ export const run = async () => {
       height: 181,
       minMagnitude: -100,
       maxMagnitude: 100,
-      xOffset: 180,
     })
     console.log('Image buffer generated for time index:', timeIndex)
     await storageService.uploadImage(buffer, 'wind', `${date.toISOString()}.png`)
