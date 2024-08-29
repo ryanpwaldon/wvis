@@ -4,8 +4,8 @@ import type { LngLat } from 'mapbox-gl'
 import { useMemo, useRef, useState } from 'react'
 import { format, formatDistanceToNow } from 'date-fns'
 
-import type { WeatherLayerId } from '@sctv/shared'
-import { WEATHER_LAYERS } from '@sctv/shared'
+import type { VectorGridId } from '@sctv/shared'
+import { convertSpeed, degreesToCompass, vectorGrids } from '@sctv/shared'
 import { Button } from '@sctv/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@sctv/ui/dropdown-menu'
 import { ThemeToggle } from '@sctv/ui/theme'
@@ -18,12 +18,27 @@ import { MapboxParticleLayer } from './mapbox-particle-layer'
 import { Timeline } from './timeline'
 
 export const Home = () => {
+  const [date, setDate] = useState<Date | null>(null)
   const [cursorLngLat, setCursorLngLat] = useState<LngLat | null>(null)
-  const [selectedWeatherLayerId, setSelectedWeatherLayerId] = useState<WeatherLayerId>('waves')
-  const selectedLayer = useMemo(() => WEATHER_LAYERS[selectedWeatherLayerId], [selectedWeatherLayerId])
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const imageUrl = useMemo(() => selectedDate && selectedLayer.imageUrlTemplate(selectedDate), [selectedDate, selectedLayer])
-  const { vectorGridData } = useVectorGrid(imageUrl)
+  const [vectorGridId, setVectorGridId] = useState<VectorGridId>('wind')
+  const vectorGrid = useMemo(() => vectorGrids[vectorGridId], [vectorGridId])
+  const vectorGridUrl = useMemo(() => date && vectorGrid.url(date), [date, vectorGrid])
+  const { vectorGridData, queryVectorGrid } = useVectorGrid(vectorGridUrl)
+  const vectorPixel = useMemo(() => {
+    if (!cursorLngLat) return null
+    const x = ((cursorLngLat.lng % 360) / 360) * 359
+    const y = ((90 - cursorLngLat.lat) / 180) * 180
+    const rgba = queryVectorGrid(Math.round(x), Math.round(y))
+    if (!rgba) return null
+    const red = rgba[0]
+    const green = rgba[1]
+    const u = (red / 255) * 200 - 100
+    const v = (green / 255) * 200 - 100
+    const magnitude = convertSpeed(Math.sqrt(u * u + v * v), 'mps', 'kph')
+    const direction = degreesToCompass((Math.atan2(-u, -v) * (180 / Math.PI) + 360) % 360)
+    return { direction, magnitude }
+  }, [cursorLngLat, queryVectorGrid])
+
   const boundaryRef = useRef<HTMLDivElement | null>(null)
 
   return (
@@ -35,11 +50,11 @@ export const Home = () => {
         </Mapbox>
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
           <div className="flex h-full items-center">
-            <div className="px-2">{selectedDate ? format(selectedDate, 'EEEE d MMMM h:mm a') : ''}</div>
+            <div className="px-2">{date ? format(date, 'EEEE d MMMM h:mm a') : ''}</div>
           </div>
           <div className="flex h-full items-center">
             <div className="flex h-full items-center border-r px-2">
-              {cursorLngLat?.lng}, {cursorLngLat?.lat}
+              {vectorPixel?.direction}, {vectorPixel?.magnitude.toFixed(2)}
             </div>
             <Tooltip delayDuration={0}>
               <TooltipTrigger className="h-full border-r px-2">GFS / {formatDistanceToNow(new Date(), { addSuffix: true })}</TooltipTrigger>
@@ -54,8 +69,8 @@ export const Home = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent sideOffset={2} align="end">
-                <DropdownMenuRadioGroup value={selectedWeatherLayerId} onValueChange={setSelectedWeatherLayerId as (value: string) => void}>
-                  {Object.values(WEATHER_LAYERS).map((layer) => (
+                <DropdownMenuRadioGroup value={vectorGridId} onValueChange={setVectorGridId as (value: string) => void}>
+                  {Object.values(vectorGrids).map((layer) => (
                     <DropdownMenuRadioItem key={layer.id} value={layer.id}>
                       {layer.title}
                     </DropdownMenuRadioItem>
@@ -68,7 +83,7 @@ export const Home = () => {
         </div>
       </div>
       <div className="hidden">
-        <Timeline onChange={setSelectedDate} interval={3} days={7} />
+        <Timeline onChange={setDate} interval={3} days={7} />
       </div>
     </div>
   )

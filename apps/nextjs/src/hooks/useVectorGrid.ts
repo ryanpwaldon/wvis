@@ -90,5 +90,20 @@ export const useVectorGrid = (url: string | null) => {
     }
   }, [url, loadImage])
 
-  return { vectorGridData, isLoading, error }
+  const queryVectorGrid = useCallback(
+    (x: number, y: number) => {
+      if (!vectorGridData) return null
+      const index = (y * vectorGridData.width + x) * 4
+      if (index < 0 || index >= vectorGridData.data.length) return null
+      const r = vectorGridData.data[index] ?? null
+      const g = vectorGridData.data[index + 1] ?? null
+      const b = vectorGridData.data[index + 2] ?? null
+      const a = vectorGridData.data[index + 3] ?? null
+      if (r === null || g === null || b === null || a === null) return null
+      return [r, g, b, a] as const
+    },
+    [vectorGridData],
+  )
+
+  return { vectorGridData, queryVectorGrid, isLoading, error }
 }
