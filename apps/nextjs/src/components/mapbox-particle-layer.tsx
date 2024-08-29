@@ -6,15 +6,15 @@ import { useMapbox } from '~/hooks/useMapbox'
 import { ParticleRenderer } from '~/utils/particleRenderer'
 
 interface MapboxParticleLayerProps {
-  imageData: ImageData | null
+  vectorGridData: ImageData | null
 }
 
-export const MapboxParticleLayer = ({ imageData }: MapboxParticleLayerProps) => {
+export const MapboxParticleLayer = ({ vectorGridData }: MapboxParticleLayerProps) => {
   const map = useMapbox()
   const particleRenderer = useRef<ParticleRenderer | null>(null)
 
   useEffect(() => {
-    if (!imageData) return
+    if (!vectorGridData) return
     if (!particleRenderer.current) {
       map.addLayer(
         {
@@ -22,7 +22,7 @@ export const MapboxParticleLayer = ({ imageData }: MapboxParticleLayerProps) => 
           type: 'custom',
           onAdd: (map, gl) => {
             particleRenderer.current = new ParticleRenderer(map, gl)
-            particleRenderer.current.initialize(imageData)
+            particleRenderer.current.initialize(vectorGridData)
           },
           render: () => particleRenderer.current?.draw(),
         },
@@ -32,8 +32,8 @@ export const MapboxParticleLayer = ({ imageData }: MapboxParticleLayerProps) => 
       map.on('moveend', () => particleRenderer.current?.startAnimation())
       map.on('resize', () => particleRenderer.current?.resizeTextures())
     } else {
-      particleRenderer.current.updateVectorField(imageData)
+      particleRenderer.current.updateVectorField(vectorGridData)
     }
-  }, [imageData, map])
+  }, [vectorGridData, map])
   return null
 }

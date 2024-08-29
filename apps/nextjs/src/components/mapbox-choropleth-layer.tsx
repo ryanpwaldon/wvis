@@ -6,15 +6,15 @@ import { useMapbox } from '~/hooks/useMapbox'
 import { ChoroplethRenderer } from '~/utils/choroplethRenderer'
 
 interface MapboxChoroplethLayerProps {
-  imageData: ImageData | null
+  vectorGridData: ImageData | null
 }
 
-export const MapboxChoroplethLayer = ({ imageData }: MapboxChoroplethLayerProps) => {
+export const MapboxChoroplethLayer = ({ vectorGridData }: MapboxChoroplethLayerProps) => {
   const map = useMapbox()
   const choroplethRenderer = useRef<ChoroplethRenderer | null>(null)
 
   useEffect(() => {
-    if (!imageData) return
+    if (!vectorGridData) return
     if (!choroplethRenderer.current) {
       map.addLayer(
         {
@@ -23,7 +23,7 @@ export const MapboxChoroplethLayer = ({ imageData }: MapboxChoroplethLayerProps)
           onAdd: (map, gl) => {
             choroplethRenderer.current = new ChoroplethRenderer(map, gl)
             choroplethRenderer.current.updateMapBounds()
-            choroplethRenderer.current.setFlowField(imageData)
+            choroplethRenderer.current.setFlowField(vectorGridData)
           },
           render: () => choroplethRenderer.current?.draw(),
         },
@@ -31,8 +31,8 @@ export const MapboxChoroplethLayer = ({ imageData }: MapboxChoroplethLayerProps)
       )
       map.on('move', () => choroplethRenderer.current?.updateMapBounds())
     } else {
-      choroplethRenderer.current.setFlowField(imageData)
+      choroplethRenderer.current.setFlowField(vectorGridData)
     }
-  }, [imageData, map])
+  }, [vectorGridData, map])
   return null
 }

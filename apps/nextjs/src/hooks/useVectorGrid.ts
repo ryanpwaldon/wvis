@@ -1,13 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-interface UseImageDataResult {
-  imageData: ImageData | null
-  isLoading: boolean
-  error: Error | null
-}
-
-function useImageData(url: string | null): UseImageDataResult {
-  const [imageData, setImageData] = useState<ImageData | null>(null)
+export const useVectorGrid = (url: string | null) => {
+  const [vectorGridData, setVectorGridData] = useState<ImageData | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<Error | null>(null)
 
@@ -39,7 +33,7 @@ function useImageData(url: string | null): UseImageDataResult {
         if (ctx) {
           ctx.drawImage(img, 0, 0)
           const imgData = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height)
-          setImageData(imgData)
+          setVectorGridData(imgData)
           setIsLoading(false)
           setError(null)
         } else {
@@ -81,7 +75,7 @@ function useImageData(url: string | null): UseImageDataResult {
       }
     } else {
       // Reset state when URL is null
-      setImageData(null)
+      setVectorGridData(null)
       setIsLoading(false)
       setError(null)
 
@@ -96,7 +90,5 @@ function useImageData(url: string | null): UseImageDataResult {
     }
   }, [url, loadImage])
 
-  return { imageData, isLoading, error }
+  return { vectorGridData, isLoading, error }
 }
-
-export default useImageData
