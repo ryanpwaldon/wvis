@@ -1,6 +1,5 @@
 'use client'
 
-import type { LngLat } from 'mapbox-gl'
 import { useMemo, useRef, useState } from 'react'
 import { format, formatDistanceToNow } from 'date-fns'
 
@@ -19,25 +18,12 @@ import { Timeline } from './timeline'
 
 export const Home = () => {
   const [date, setDate] = useState<Date | null>(null)
-  const [cursorLngLat, setCursorLngLat] = useState<LngLat | null>(null)
+  const [cursorLngLat, setCursorLngLat] = useState<[number, number] | null>(null)
   const [vectorGridId, setVectorGridId] = useState<VectorGridId>('wind')
   const vectorGrid = useMemo(() => vectorGrids[vectorGridId], [vectorGridId])
   const vectorGridUrl = useMemo(() => date && vectorGrid.url(date), [date, vectorGrid])
-  const { vectorGridData, queryVectorGrid } = useVectorGrid(vectorGridUrl)
-  const vectorPixel = useMemo(() => {
-    if (!cursorLngLat) return null
-    const x = ((cursorLngLat.lng % 360) / 360) * 359
-    const y = ((90 - cursorLngLat.lat) / 180) * 180
-    const rgba = queryVectorGrid(Math.round(x), Math.round(y))
-    if (!rgba) return null
-    const red = rgba[0]
-    const green = rgba[1]
-    const u = (red / 255) * 200 - 100
-    const v = (green / 255) * 200 - 100
-    const magnitude = convertSpeed(Math.sqrt(u * u + v * v), 'mps', 'kph')
-    const direction = degreesToCompass((Math.atan2(-u, -v) * (180 / Math.PI) + 360) % 360)
-    return { direction, magnitude }
-  }, [cursorLngLat, queryVectorGrid])
+  const { vectorGridData, queryVectorGrid } = useVectorGrid(vectorGridUrl, vectorGrid)
+  const vectorGridPoint = useMemo(() => queryVectorGrid(cursorLngLat), [cursorLngLat, queryVectorGrid])
 
   const boundaryRef = useRef<HTMLDivElement | null>(null)
 
@@ -53,9 +39,11 @@ export const Home = () => {
             <div className="px-2">{date ? format(date, 'EEEE d MMMM h:mm a') : ''}</div>
           </div>
           <div className="flex h-full items-center">
-            <div className="flex h-full items-center border-r px-2">
-              {vectorPixel?.direction}, {vectorPixel?.magnitude.toFixed(2)}
-            </div>
+            {vectorGridPoint && (
+              <div className="flex h-full items-center border-r px-2">
+                {degreesToCompass(vectorGridPoint.direction)}, {convertSpeed(vectorGridPoint.magnitude, 'mps', 'kph').toFixed(2)}
+              </div>
+            )}
             <Tooltip delayDuration={0}>
               <TooltipTrigger className="h-full border-r px-2">GFS / {formatDistanceToNow(new Date(), { addSuffix: true })}</TooltipTrigger>
               <TooltipContent sideOffset={2} collisionBoundary={boundaryRef.current}>

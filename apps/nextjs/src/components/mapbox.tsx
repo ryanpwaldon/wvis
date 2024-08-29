@@ -1,6 +1,6 @@
 'use client'
 
-import type { LngLat, StyleSpecification } from 'mapbox-gl'
+import type { StyleSpecification } from 'mapbox-gl'
 import React, { createContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Map } from 'mapbox-gl'
 import { useTheme } from 'next-themes'
@@ -16,7 +16,7 @@ import { mapboxStyle } from './mapbox-style'
 interface MapboxProps {
   className?: string
   children?: React.ReactNode
-  onCursorLngLatChange?: (lngLat: LngLat) => void
+  onCursorLngLatChange?: (lngLat: [number, number]) => void
 }
 
 export const MapboxContext = createContext<Map | null>(null)
@@ -27,7 +27,7 @@ export const Mapbox = ({ className, children, onCursorLngLatChange }: MapboxProp
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const [isMapReady, setIsMapReady] = useState(false)
   const mapStyle = useMemo(() => (theme === 'light' ? mapboxStyle('light') : mapboxStyle('dark')), [theme])
-  const throttledOnCursorLngLatChange = useThrottledCallback((lngLat: LngLat) => onCursorLngLatChange?.(lngLat), 20)
+  const throttledOnCursorLngLatChange = useThrottledCallback((lngLat: [number, number]) => onCursorLngLatChange?.(lngLat), 20)
 
   useEffect(() => {
     if (!mapRef.current && mapContainerRef.current) {
@@ -41,7 +41,7 @@ export const Mapbox = ({ className, children, onCursorLngLatChange }: MapboxProp
         accessToken: env.NEXT_PUBLIC_MAPBOX_API_KEY,
       })
       mapRef.current.on('load', () => setIsMapReady(true))
-      mapRef.current.on('mousemove', (e) => throttledOnCursorLngLatChange(e.lngLat.wrap()))
+      mapRef.current.on('mousemove', (e) => throttledOnCursorLngLatChange(e.lngLat.wrap().toArray()))
     }
     return () => {
       if (mapRef.current) {
