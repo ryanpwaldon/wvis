@@ -17,7 +17,7 @@ import { MapboxParticleLayer } from './mapbox-particle-layer'
 import { Timeline } from './timeline'
 
 export const Home = () => {
-  const [selectedWeatherLayerId, setSelectedWeatherLayerId] = useState<WeatherLayerId>('wind')
+  const [selectedWeatherLayerId, setSelectedWeatherLayerId] = useState<WeatherLayerId>('waves')
   const selectedLayer = useMemo(() => WEATHER_LAYERS[selectedWeatherLayerId], [selectedWeatherLayerId])
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const layerImage = useMemo(() => selectedDate && selectedLayer.imageUrlTemplate(selectedDate), [selectedDate, selectedLayer])

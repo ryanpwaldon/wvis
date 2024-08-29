@@ -19,7 +19,6 @@ export const fs = /* glsl */ `
   uniform vec2 u_flow_field_res;
   uniform vec2 u_flow_field_min_speed;
   uniform vec2 u_flow_field_max_speed;
-  uniform vec4 u_flow_field_geo_bounds;
   uniform vec4 u_map_mercator_bounds;
   varying vec2 v_tex_pos;
 
@@ -46,13 +45,11 @@ export const fs = /* glsl */ `
   void main() {
     float x_domain = abs(u_map_mercator_bounds.x - u_map_mercator_bounds.z);
     float y_domain = abs(u_map_mercator_bounds.y - u_map_mercator_bounds.w);
-    vec2 coordinate = getLngLat(x_domain, y_domain, v_tex_pos);
-    float lng = coordinate.x;
-    float lat = coordinate.y;
-    float lng_domain = u_flow_field_geo_bounds.z - u_flow_field_geo_bounds.x;
-    float lat_domain = u_flow_field_geo_bounds.w - u_flow_field_geo_bounds.y;
-    vec2 pos_lookup = vec2((lng - u_flow_field_geo_bounds.x) / lng_domain, (lat - u_flow_field_geo_bounds.y) / lat_domain);
-    vec2 velocity = mix(u_flow_field_min_speed, u_flow_field_max_speed, getVelocity(pos_lookup));
+    vec2 lngLat = getLngLat(x_domain, y_domain, v_tex_pos);
+    float lng = lngLat.x;
+    float lat = lngLat.y;
+    vec2 flow_field_pos = vec2((lng + 180.0) / 360.0, (lat + 90.0) / 180.0);
+    vec2 velocity = mix(u_flow_field_min_speed, u_flow_field_max_speed, getVelocity(flow_field_pos));
     float speed_t = length(velocity) / length(u_flow_field_max_speed);
     gl_FragColor = vec4(1.0, 1.0, 1.0, speed_t);
   }
@@ -60,7 +57,6 @@ export const fs = /* glsl */ `
 
 export class ChoroplethRenderer {
   private readonly VECTOR_MAGNITUDE_RANGE = [-200, 200] as const
-  private readonly LONGITUDE_LATITUDE_BOUNDS = [-180, -90, 180, 90] as const
 
   private map: Map
   private gl: WebGL2RenderingContext
@@ -117,7 +113,6 @@ export class ChoroplethRenderer {
       u_flow_field_min_speed: [this.VECTOR_MAGNITUDE_RANGE[0], this.VECTOR_MAGNITUDE_RANGE[0]],
       u_flow_field_max_speed: [this.VECTOR_MAGNITUDE_RANGE[1], this.VECTOR_MAGNITUDE_RANGE[1]],
       u_flow_field_res: [this.flowFieldData.width, this.flowFieldData.height],
-      u_flow_field_geo_bounds: this.LONGITUDE_LATITUDE_BOUNDS,
       u_map_mercator_bounds: this.mapMercatorBounds,
     })
     drawBufferInfo(this.gl, choroplethQuadBufferInfo)
