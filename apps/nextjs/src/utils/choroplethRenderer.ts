@@ -34,24 +34,24 @@ export const fs = /* glsl */ `
     return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
   }
 
-  vec2 returnLonLat(float x_domain, float y_domain, vec2 pos) {
+  vec2 getLngLat(float x_domain, float y_domain, vec2 pos) {
     float mercator_x = fract(u_map_mercator_bounds.x + pos.x * x_domain);
     float mercator_y = u_map_mercator_bounds.w + pos.y * y_domain;
-    float lon = mercator_x * 360.0 - 180.0;
+    float lng = mercator_x * 360.0 - 180.0;
     float lat2 = 180.0 - mercator_y * 360.0;
     float lat = 90.0 - (360.0 / 3.141592654 * atan(exp(lat2 * 3.141592654/180.0)));
-    return vec2(lon, lat);
+    return vec2(lng, lat);
   }
 
   void main() {
     float x_domain = abs(u_map_mercator_bounds.x - u_map_mercator_bounds.z);
     float y_domain = abs(u_map_mercator_bounds.y - u_map_mercator_bounds.w);
-    vec2 coordinate = returnLonLat(x_domain, y_domain, v_tex_pos);
-    float lon = coordinate.x;
+    vec2 coordinate = getLngLat(x_domain, y_domain, v_tex_pos);
+    float lng = coordinate.x;
     float lat = coordinate.y;
-    float lon_domain = u_flow_field_geo_bounds.z - u_flow_field_geo_bounds.x;
+    float lng_domain = u_flow_field_geo_bounds.z - u_flow_field_geo_bounds.x;
     float lat_domain = u_flow_field_geo_bounds.w - u_flow_field_geo_bounds.y;
-    vec2 pos_lookup = vec2((lon - u_flow_field_geo_bounds.x) / lon_domain, (lat - u_flow_field_geo_bounds.y) / lat_domain);
+    vec2 pos_lookup = vec2((lng - u_flow_field_geo_bounds.x) / lng_domain, (lat - u_flow_field_geo_bounds.y) / lat_domain);
     vec2 velocity = mix(u_flow_field_min_speed, u_flow_field_max_speed, getVelocity(pos_lookup));
     float speed_t = length(velocity) / length(u_flow_field_max_speed);
     gl_FragColor = vec4(1.0, 1.0, 1.0, speed_t);
@@ -59,7 +59,7 @@ export const fs = /* glsl */ `
 `
 
 export class ChoroplethRenderer {
-  private readonly VECTOR_MAGNITUDE_RANGE = [-100, 100] as const
+  private readonly VECTOR_MAGNITUDE_RANGE = [-200, 200] as const
   private readonly LONGITUDE_LATITUDE_BOUNDS = [-180, -90, 180, 90] as const
 
   private map: Map
