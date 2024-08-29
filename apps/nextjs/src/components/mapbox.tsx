@@ -51,7 +51,12 @@ export const Mapbox = ({ className, children }: MapboxProps) => {
   useEffect(() => void mapRef.current?.setStyle(mapStyle as StyleSpecification), [mapStyle])
 
   return (
-    <div className={cn('relative h-full w-full bg-background [&_.mapboxgl-map_.mapboxgl-ctrl-logo]:!hidden [&_canvas]:!outline-none', className)}>
+    <div
+      className={cn(
+        'relative h-full w-full bg-background [&_.mapboxgl-map_.mapboxgl-ctrl-logo]:!hidden [&_canvas]:!cursor-default [&_canvas]:!outline-none',
+        className,
+      )}
+    >
       <div ref={mapContainerRef} className="h-full w-full" />
       <MapboxContext.Provider value={mapRef.current}>{isMapReady && children}</MapboxContext.Provider>
     </div>
