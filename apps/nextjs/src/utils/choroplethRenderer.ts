@@ -69,7 +69,7 @@ export class ChoroplethRenderer {
     this.map = map
     this.gl = gl
     this.choroplethDrawProgram = createProgramInfo(this.gl, [vs, fs])
-    this.flowFieldTexture = createTexture(this.gl, { mag: this.gl.LINEAR, min: this.gl.LINEAR, width: 1, height: 1 })
+    this.flowFieldTexture = createTexture(this.gl, { mag: this.gl.NEAREST, min: this.gl.NEAREST, width: 1, height: 1 })
   }
 
   public setFlowField(data: ImageData) {
@@ -86,8 +86,8 @@ export class ChoroplethRenderer {
       this.gl.UNSIGNED_BYTE,
       this.flowFieldData.data,
     )
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR)
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR)
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST)
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST)
   }
 
   public updateMapBounds() {
@@ -112,7 +112,7 @@ export class ChoroplethRenderer {
       u_flow_field: this.flowFieldTexture,
       u_flow_field_min_speed: [this.VECTOR_MAGNITUDE_RANGE[0], this.VECTOR_MAGNITUDE_RANGE[0]],
       u_flow_field_max_speed: [this.VECTOR_MAGNITUDE_RANGE[1], this.VECTOR_MAGNITUDE_RANGE[1]],
-      u_flow_field_res: [this.flowFieldData.width, this.flowFieldData.height],
+      u_flow_field_res: [this.flowFieldData.width, this.flowFieldData.height - 1], // subtract 1 from height fix
       u_map_mercator_bounds: this.mapMercatorBounds,
     })
     drawBufferInfo(this.gl, choroplethQuadBufferInfo)

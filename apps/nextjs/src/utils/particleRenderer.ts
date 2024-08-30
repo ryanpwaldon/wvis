@@ -178,8 +178,8 @@ class ParticleRenderer {
     const emptyTextureData = new Uint8Array(this.gl.canvas.width * this.gl.canvas.height * 4)
     this.renderTextures = createTextures(this.gl, {
       vectorFieldTexture: {
-        mag: this.gl.LINEAR,
-        min: this.gl.LINEAR,
+        mag: this.gl.NEAREST,
+        min: this.gl.NEAREST,
         width: this.vectorFieldData.width,
         height: this.vectorFieldData.height,
         format: this.gl.RGBA,
@@ -319,7 +319,7 @@ class ParticleRenderer {
       u_flow_field_min_speed: [this.VECTOR_MAGNITUDE_RANGE[0], this.VECTOR_MAGNITUDE_RANGE[0]],
       u_flow_field_max_speed: [this.VECTOR_MAGNITUDE_RANGE[1], this.VECTOR_MAGNITUDE_RANGE[1]],
       u_random_seed: Math.random(),
-      u_flow_field_res: [this.vectorFieldData.width, this.vectorFieldData.height],
+      u_flow_field_res: [this.vectorFieldData.width, this.vectorFieldData.height - 1], // subtract 1 from height fix
       u_speed_factor: this.PARTICLE_SPEED_FACTOR,
       u_drop_rate: this.PARTICLE_DROP_RATE,
       u_drop_rate_bump: this.PARTICLE_DROP_RATE_INCREASE,
