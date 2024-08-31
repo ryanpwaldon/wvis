@@ -1,7 +1,5 @@
 import ky from 'ky'
 
-import { vectorGrids } from '@sctv/shared'
-
 import { storageService } from '../services/storageService'
 import { dateFromParts } from '../utils/dateFromParts'
 import { generateFlowFieldImage } from '../utils/generateFlowFieldImage'
@@ -57,14 +55,17 @@ export const run = async () => {
     console.log(`Generated URL for time index: ${timeIndex}`, url)
     const data = await ky(url).text()
     console.log('Data fetched for time index:', timeIndex)
-    const windU = parse(data, windUKey)
-    const windV = parse(data, windVKey)
+    const parsedU = parse(data, windUKey)
+    const parsedV = parse(data, windVKey)
     const buffer = await generateFlowFieldImage({
-      uValues: windU,
-      vValues: windV,
+      u: parsedU.values,
+      v: parsedV.values,
+      minU: parsedU.min,
+      maxU: parsedU.max,
+      minV: parsedV.min,
+      maxV: parsedV.max,
       width: 360,
       height: 181,
-      magnitude: vectorGrids.wind.magnitude,
     })
     console.log('Image buffer generated for time index:', timeIndex)
     await storageService.uploadImage(buffer, 'wind', `${date.toISOString()}.png`)

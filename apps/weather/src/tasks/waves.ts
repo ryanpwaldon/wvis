@@ -1,7 +1,5 @@
 import ky from 'ky'
 
-import { vectorGrids } from '@sctv/shared'
-
 import { storageService } from '../services/storageService'
 import { componentsToU } from '../utils/componentsToU'
 import { componentsToV } from '../utils/componentsToV'
@@ -60,17 +58,34 @@ export const run = async () => {
     console.log(`Generated URL for time index: ${timeIndex}`, url)
     const data = await ky(url).text()
     console.log('Data fetched time index:', timeIndex)
-    const wavesDirectionHeightTuples = zip(parse(data, wavesDirectionKey), parse(data, wavesHeightKey))
+    const wavesDirectionHeightTuples = zip(parse(data, wavesDirectionKey).values, parse(data, wavesHeightKey).values)
     console.log('Parsed waves direction and height data for time index:', timeIndex)
-    const wavesU = wavesDirectionHeightTuples.map(([degrees, magnitude]) => componentsToU(degrees, magnitude))
-    const wavesV = wavesDirectionHeightTuples.map(([degrees, magnitude]) => componentsToV(degrees, magnitude))
+    let minU = Infinity
+    let maxU = -Infinity
+    let minV = Infinity
+    let maxV = -Infinity
+    const wavesU: number[] = []
+    const wavesV: number[] = []
+    wavesDirectionHeightTuples.forEach(([direction, height]) => {
+      const u = componentsToU(direction, height)
+      const v = componentsToV(direction, height)
+      wavesU.push(u)
+      wavesV.push(v)
+      if (u < minU) minU = u
+      if (u > maxU) maxU = u
+      if (v < minV) minV = v
+      if (v > maxV) maxV = v
+    })
     console.log(`Computed U and V components time index ${timeIndex}`)
     const buffer = await generateFlowFieldImage({
-      uValues: wavesU,
-      vValues: wavesV,
+      u: wavesU,
+      v: wavesV,
+      minU,
+      maxU,
+      minV,
+      maxV,
       width: 360,
       height: 181,
-      magnitude: vectorGrids.waves.magnitude,
     })
     console.log('Image buffer generated time index:', timeIndex)
     await storageService.uploadImage(buffer, 'waves', `${date.toISOString()}.png`)

@@ -1,5 +1,4 @@
-export const componentsToV = (degrees: number | null, magnitude: number | null) => {
-  if (degrees === null || magnitude === null) return 0
+export const componentsToV = (degrees: number, magnitude: number) => {
   const radians = degrees * (Math.PI / 180)
   return -magnitude * Math.cos(radians)
 }

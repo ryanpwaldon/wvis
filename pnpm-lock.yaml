@@ -39,6 +39,9 @@ catalogs:
     ky:
       specifier: ^1.7.0
       version: 1.7.0
+    meta-png:
+      specifier: ^1.0.6
+      version: 1.0.6
     prettier:
       specifier: ^3.3.3
       version: 3.3.3
@@ -251,6 +254,9 @@ importers:
       ky:
         specifier: 'catalog:'
         version: 1.7.0
+      meta-png:
+        specifier: 'catalog:'
+        version: 1.0.6
       tsx:
         specifier: ^4.17.0
         version: 4.17.0
@@ -4848,6 +4854,9 @@ packages:
   merge2@1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
+
+  meta-png@1.0.6:
+    resolution: {integrity: sha512-eQtEi5E9axqwqA/sDK1dyhX9kYHCUe2m+45aQ3JHrozjGPs+/ab+hdhPp7A3GUNW+ZAbavrsg5xQ4r5jkGDX+A==}
 
   micromatch@4.0.7:
     resolution: {integrity: sha512-LPP/3KorzCwBxfeUuZmaR6bG2kdeHSbe0P2tY3FLRU4vYrjYz5hI4QZwV0njUx3jeuKe67YukQ1LSPZBKDqO/Q==}
@@ -11239,6 +11248,8 @@ snapshots:
   merge-stream@2.0.0: {}
 
   merge2@1.4.1: {}
+
+  meta-png@1.0.6: {}
 
   micromatch@4.0.7:
     dependencies:

@@ -22,7 +22,8 @@
     "zod": "catalog:",
     "@sctv/shared": "workspace:*",
     "d3-scale": "catalog:",
-    "d3-interpolate": "catalog:"
+    "d3-interpolate": "catalog:",
+    "meta-png": "catalog:"
   },
   "devDependencies": {
     "@sctv/eslint-config": "workspace:*",
