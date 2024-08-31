@@ -13,7 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@sctv/ui/tooltip'
 import { Mapbox } from '~/components/mapbox'
 import { useVectorGrid } from '~/hooks/useVectorGrid'
 import { MapboxChoroplethLayer } from './mapbox-choropleth-layer'
-import { MapboxParticleLayer } from './mapbox-particle-layer'
+// import { MapboxParticleLayer } from './mapbox-particle-layer'
 import { Timeline } from './timeline'
 
 export const Home = () => {
@@ -31,7 +31,7 @@ export const Home = () => {
     <div className="h-full w-full border p-4">
       <div ref={boundaryRef} className="flex h-full w-full flex-col divide-y overflow-hidden border">
         <Mapbox onCursorLngLatChange={setCursorLngLat}>
-          <MapboxParticleLayer vectorGridData={vectorGridData} />
+          {/* <MapboxParticleLayer vectorGridData={vectorGridData} /> */}
           <MapboxChoroplethLayer vectorGridData={vectorGridData} />
         </Mapbox>
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">

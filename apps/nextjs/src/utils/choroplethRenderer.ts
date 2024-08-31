@@ -65,7 +65,14 @@ export class ChoroplethRenderer {
     this.map = map
     this.gl = gl
     this.choroplethDrawProgram = createProgramInfo(this.gl, [vs, fs])
-    this.flowFieldTexture = createTexture(this.gl, { mag: this.gl.NEAREST, min: this.gl.NEAREST, width: 1, height: 1 })
+    this.flowFieldTexture = createTexture(this.gl, {
+      width: 1,
+      height: 1,
+      mag: this.gl.NEAREST,
+      min: this.gl.NEAREST,
+      wrapS: this.gl.REPEAT,
+      wrapT: this.gl.CLAMP_TO_EDGE,
+    })
   }
 
   public setFlowField(data: ImageData) {
@@ -82,8 +89,6 @@ export class ChoroplethRenderer {
       this.gl.UNSIGNED_BYTE,
       this.flowFieldData.data,
     )
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST)
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST)
   }
 
   public updateMapBounds() {
