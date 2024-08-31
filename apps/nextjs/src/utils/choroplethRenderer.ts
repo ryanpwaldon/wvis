@@ -15,19 +15,19 @@ export const vs = /* glsl */ `
 
 export const fs = /* glsl */ `
   precision highp float;
-  uniform sampler2D u_flow_field;
-  uniform vec2 u_flow_field_res;
+  uniform sampler2D u_vector_grid;
+  uniform vec2 u_vector_grid_res;
   uniform vec4 u_map_mercator_bounds;
   varying vec2 v_tex_pos;
 
   vec2 getVelocity(const vec2 uv) {
-    vec2 px = 1.0 / u_flow_field_res;
-    vec2 vc = (floor(uv * u_flow_field_res)) * px;
-    vec2 f = fract(uv * u_flow_field_res);
-    vec2 tl = texture2D(u_flow_field, vc).rg;
-    vec2 tr = texture2D(u_flow_field, vc + vec2(px.x, 0)).rg;
-    vec2 bl = texture2D(u_flow_field, vc + vec2(0, px.y)).rg;
-    vec2 br = texture2D(u_flow_field, vc + px).rg;
+    vec2 px = 1.0 / u_vector_grid_res;
+    vec2 vc = (floor(uv * u_vector_grid_res)) * px;
+    vec2 f = fract(uv * u_vector_grid_res);
+    vec2 tl = texture2D(u_vector_grid, vc).rg;
+    vec2 tr = texture2D(u_vector_grid, vc + vec2(px.x, 0)).rg;
+    vec2 bl = texture2D(u_vector_grid, vc + vec2(0, px.y)).rg;
+    vec2 br = texture2D(u_vector_grid, vc + px).rg;
     return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
   }
 
@@ -46,10 +46,10 @@ export const fs = /* glsl */ `
     vec2 lngLat = getLngLat(x_domain, y_domain, v_tex_pos);
     float lng = lngLat.x;
     float lat = lngLat.y;
-    vec2 flow_field_pos = vec2(lng / 360.0, (lat + 90.0) / 180.0);
-    vec2 velocity = getVelocity(flow_field_pos) * 2.0 - 1.0; // normalise between [-1, 1]
-    float speed_t = length(velocity) / sqrt(2.0); // divide by max length to get meaningful magnitude
-    gl_FragColor = vec4(1.0, 1.0, 1.0, speed_t);
+    vec2 vector_grid_pos = vec2(lng / 360.0, (lat + 90.0) / 180.0);
+    vec2 velocity = getVelocity(vector_grid_pos) * 2.0 - 1.0; // normalise between [-1, 1]
+    float magnitude = length(velocity) / sqrt(2.0); // divide by max length to get meaningful magnitude
+    gl_FragColor = vec4(1.0, 1.0, 1.0, magnitude);
   }
 `
 
@@ -110,8 +110,8 @@ export class ChoroplethRenderer {
     const choroplethQuadBufferInfo = createBufferInfoFromArrays(this.gl, { a_pos: { numComponents: 2, data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]) } }) // prettier-ignore
     setBuffersAndAttributes(this.gl, this.choroplethDrawProgram, choroplethQuadBufferInfo)
     setUniforms(this.choroplethDrawProgram, {
-      u_flow_field: this.flowFieldTexture,
-      u_flow_field_res: [this.flowFieldData.width, this.flowFieldData.height - 1], // subtract 1 from height fix
+      u_vector_grid: this.flowFieldTexture,
+      u_vector_grid_res: [this.flowFieldData.width, this.flowFieldData.height - 1], // subtract 1 from height fix
       u_map_mercator_bounds: this.mapMercatorBounds,
     })
     drawBufferInfo(this.gl, choroplethQuadBufferInfo)
