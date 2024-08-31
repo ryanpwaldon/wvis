@@ -1,5 +1,5 @@
 export * from './constants'
-export * from './config/vectorGrids'
+export * from './config/vectorGridConfig'
 export * from './utils/convertSpeed'
 export * from './utils/degreesToCompass'
 export * from './utils/scaleLngLat'

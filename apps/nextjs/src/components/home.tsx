@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from 'react'
 import { format, formatDistanceToNow } from 'date-fns'
 
 import type { VectorGridId } from '@sctv/shared'
-import { convertSpeed, degreesToCompass, vectorGrids } from '@sctv/shared'
+import { convertSpeed, degreesToCompass, vectorGridConfigs } from '@sctv/shared'
 import { Button } from '@sctv/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@sctv/ui/dropdown-menu'
 import { ThemeToggle } from '@sctv/ui/theme'
@@ -20,7 +20,7 @@ export const Home = () => {
   const [date, setDate] = useState<Date | null>(null)
   const [cursorLngLat, setCursorLngLat] = useState<[number, number] | null>(null)
   const [vectorGridId, setVectorGridId] = useState<VectorGridId>('wind')
-  const vectorGridConfig = useMemo(() => vectorGrids[vectorGridId], [vectorGridId])
+  const vectorGridConfig = useMemo(() => vectorGridConfigs[vectorGridId], [vectorGridId])
   const vectorGridUrl = useMemo(() => date && vectorGridConfig.url(date), [date, vectorGridConfig])
   const { vectorGrid, queryVectorGrid } = useVectorGrid(vectorGridUrl)
   const vectorGridPoint = useMemo(() => queryVectorGrid(cursorLngLat), [cursorLngLat, queryVectorGrid])
@@ -58,7 +58,7 @@ export const Home = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent sideOffset={2} align="end">
                 <DropdownMenuRadioGroup value={vectorGridId} onValueChange={setVectorGridId as (value: string) => void}>
-                  {Object.values(vectorGrids).map((layer) => (
+                  {Object.values(vectorGridConfigs).map((layer) => (
                     <DropdownMenuRadioItem key={layer.id} value={layer.id}>
                       {layer.title}
                     </DropdownMenuRadioItem>
