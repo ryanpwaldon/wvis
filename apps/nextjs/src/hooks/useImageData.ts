@@ -1,75 +1,59 @@
+import type { IPngMetadataTextualData } from '@lunapaint/png-codec'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { decodePng } from '@lunapaint/png-codec'
+import ky from 'ky'
+import { z } from 'zod'
+
+const vectorGridMetadataSchema = z.object({
+  minU: z.string().pipe(z.coerce.number()),
+  maxU: z.string().pipe(z.coerce.number()),
+  minV: z.string().pipe(z.coerce.number()),
+  maxV: z.string().pipe(z.coerce.number()),
+})
+
+export interface VectorGrid {
+  image: ImageData
+  metadata: z.infer<typeof vectorGridMetadataSchema>
+}
 
 export const useImageData = (url: string | null) => {
-  const [imageData, setImageData] = useState<ImageData | null>(null)
+  const [vectorGrid, setVectorGrid] = useState<VectorGrid | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<Error | null>(null)
   const latestUrl = useRef<string | null>(url)
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
-  useEffect(() => void (latestUrl.current = url), [url])
-
-  const loadImage = useCallback((url: string) => {
-    const img = new Image()
-    img.crossOrigin = 'anonymous'
-    img.onload = () => {
+  const loadImage = useCallback(async (url: string) => {
+    try {
+      const arrayBuffer = await ky(url, { mode: 'cors' }).arrayBuffer()
+      const decoded = await decodePng(new Uint8Array(arrayBuffer), { parseChunkTypes: '*', strictMode: true })
       if (url === latestUrl.current) {
-        if (canvasRef.current) {
-          const ctx = canvasRef.current.getContext('2d')
-          if (ctx) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-        }
-        canvasRef.current = document.createElement('canvas')
-        canvasRef.current.width = img.width
-        canvasRef.current.height = img.height
-        const ctx = canvasRef.current.getContext('2d')
-        if (ctx) {
-          ctx.drawImage(img, 0, 0)
-          const imgData = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height)
-          setImageData(imgData)
-          setIsLoading(false)
-          setError(null)
-        } else {
-          setError(new Error('Could not get 2D context from canvas'))
-          setIsLoading(false)
-        }
+        const decodedImage = new ImageData(new Uint8ClampedArray(decoded.image.data.buffer), decoded.image.width, decoded.image.height)
+        const decodedMetadata = vectorGridMetadataSchema.parse(Object.fromEntries(decoded.metadata.filter((item): item is IPngMetadataTextualData => item.type === 'tEXt').map((item) => [item.keyword, item.text]))) // prettier-ignore
+        setVectorGrid({ image: decodedImage, metadata: decodedMetadata })
+        setIsLoading(false)
+        setError(null)
       }
-    }
-    img.onerror = () => {
+    } catch (err) {
+      console.error('Error loading image:', err)
       if (url === latestUrl.current) {
         setError(new Error('Failed to load image'))
         setIsLoading(false)
       }
-    }
-    img.src = url
-    return () => {
-      img.onload = null
-      img.onerror = null
     }
   }, [])
 
   useEffect(() => {
     if (url) {
       setIsLoading(true)
-      const cleanup = loadImage(url)
-      return () => {
-        cleanup()
-        if (canvasRef.current) {
-          const ctx = canvasRef.current.getContext('2d')
-          if (ctx) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-          canvasRef.current = null
-        }
-      }
+      void loadImage(url)
     } else {
-      setImageData(null)
+      setVectorGrid(null)
       setIsLoading(false)
       setError(null)
-      if (canvasRef.current) {
-        const ctx = canvasRef.current.getContext('2d')
-        if (ctx) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-        canvasRef.current = null
-      }
     }
   }, [url, loadImage])
 
-  return { imageData, isLoading, error }
+  useEffect(() => void (latestUrl.current = url), [url])
+
+  return { vectorGrid, isLoading, error }
 }

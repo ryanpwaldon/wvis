@@ -47,7 +47,7 @@ export const run = async () => {
   const latestJobDate = await getLatestJob()
   console.log('Latest job date:', latestJobDate)
   if (latestJobDate === latestRunDate.toISOString()) return console.log('Wind tiles up to date.')
-  const schedule = generateSchedule(latestRunDate, 8)
+  const schedule = generateSchedule(latestRunDate, 2)
   console.log('Generated schedule:', schedule)
   for (const [timeIndex, date] of schedule) {
     console.log(`Processing time index: ${timeIndex}, date: ${date.toISOString()}`)

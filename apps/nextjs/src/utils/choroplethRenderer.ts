@@ -3,6 +3,8 @@ import type { ProgramInfo } from 'twgl.js'
 import { MercatorCoordinate } from 'mapbox-gl'
 import { createBufferInfoFromArrays, createProgramInfo, createTexture, drawBufferInfo, setBuffersAndAttributes, setUniforms } from 'twgl.js'
 
+import type { VectorGrid } from '~/hooks/useImageData'
+
 export const vs = /* glsl */ `
   precision highp float;
   attribute vec2 a_pos;
@@ -17,6 +19,8 @@ export const fs = /* glsl */ `
   precision highp float;
   uniform sampler2D u_vector_grid;
   uniform vec2 u_vector_grid_res;
+  uniform vec2 u_vector_grid_min_mag;
+  uniform vec2 u_vector_grid_max_mag;
   uniform vec4 u_map_mercator_bounds;
   varying vec2 v_tex_pos;
 
@@ -47,16 +51,16 @@ export const fs = /* glsl */ `
     float lng = lngLat.x;
     float lat = lngLat.y;
     vec2 vector_grid_pos = vec2(lng / 360.0, (lat + 90.0) / 180.0);
-    vec2 velocity = getVelocity(vector_grid_pos) * 2.0 - 1.0; // normalise between [-1, 1]
-    float magnitude = length(velocity) / sqrt(2.0); // divide by max length to get meaningful magnitude
-    gl_FragColor = vec4(1.0, 1.0, 1.0, magnitude);
+    vec2 velocity = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, getVelocity(vector_grid_pos));
+    float magnitude = length(velocity) / length(u_vector_grid_max_mag);
+    gl_FragColor = vec4(1.0, 1.0, 1.0, magnitude * 0.1);
   }
 `
 
 export class ChoroplethRenderer {
   private map: Map
   private gl: WebGL2RenderingContext
-  private flowFieldData?: ImageData
+  private flowFieldData?: VectorGrid
   private flowFieldTexture: WebGLTexture
   private choroplethDrawProgram: ProgramInfo
   private mapMercatorBounds: [number, number, number, number] = [0, 0, 0, 0]
@@ -75,19 +79,19 @@ export class ChoroplethRenderer {
     })
   }
 
-  public setFlowField(data: ImageData) {
-    this.flowFieldData = data
+  public setFlowField(vectorGrid: VectorGrid) {
+    this.flowFieldData = vectorGrid
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.flowFieldTexture)
     this.gl.texImage2D(
       this.gl.TEXTURE_2D,
       0,
       this.gl.RGBA,
-      this.flowFieldData.width,
-      this.flowFieldData.height,
+      this.flowFieldData.image.width,
+      this.flowFieldData.image.height,
       0,
       this.gl.RGBA,
       this.gl.UNSIGNED_BYTE,
-      this.flowFieldData.data,
+      this.flowFieldData.image,
     )
   }
 
@@ -111,7 +115,9 @@ export class ChoroplethRenderer {
     setBuffersAndAttributes(this.gl, this.choroplethDrawProgram, choroplethQuadBufferInfo)
     setUniforms(this.choroplethDrawProgram, {
       u_vector_grid: this.flowFieldTexture,
-      u_vector_grid_res: [this.flowFieldData.width, this.flowFieldData.height - 1], // subtract 1 from height fix
+      u_vector_grid_res: [this.flowFieldData.image.width, this.flowFieldData.image.height - 1], // subtract 1 from height fix
+      u_vector_grid_min_mag: [this.flowFieldData.metadata.minU, this.flowFieldData.metadata.minV],
+      u_vector_grid_max_mag: [this.flowFieldData.metadata.maxU, this.flowFieldData.metadata.maxV],
       u_map_mercator_bounds: this.mapMercatorBounds,
     })
     drawBufferInfo(this.gl, choroplethQuadBufferInfo)

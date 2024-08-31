@@ -33,7 +33,9 @@
     "react-dom": "catalog:react18",
     "superjson": "2.2.1",
     "twgl.js": "^5.5.4",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@lunapaint/png-codec": "catalog:",
+    "d3-scale": "catalog:"
   },
   "devDependencies": {
     "@sctv/eslint-config": "workspace:*",

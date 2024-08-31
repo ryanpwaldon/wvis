@@ -2,19 +2,20 @@
 
 import { useEffect, useRef } from 'react'
 
+import type { VectorGrid } from '~/hooks/useImageData'
 import { useMapbox } from '~/hooks/useMapbox'
 import { ParticleRenderer } from '~/utils/particleRenderer'
 
 interface MapboxParticleLayerProps {
-  vectorGridData: ImageData | null
+  vectorGrid: VectorGrid | null
 }
 
-export const MapboxParticleLayer = ({ vectorGridData }: MapboxParticleLayerProps) => {
+export const MapboxParticleLayer = ({ vectorGrid }: MapboxParticleLayerProps) => {
   const map = useMapbox()
   const particleRenderer = useRef<ParticleRenderer | null>(null)
 
   useEffect(() => {
-    if (!vectorGridData) return
+    if (!vectorGrid) return
     if (!particleRenderer.current) {
       map.addLayer(
         {
@@ -22,7 +23,7 @@ export const MapboxParticleLayer = ({ vectorGridData }: MapboxParticleLayerProps
           type: 'custom',
           onAdd: (map, gl) => {
             particleRenderer.current = new ParticleRenderer(map, gl)
-            particleRenderer.current.initialize(vectorGridData)
+            particleRenderer.current.initialize(vectorGrid)
           },
           render: () => particleRenderer.current?.draw(),
         },
@@ -32,8 +33,8 @@ export const MapboxParticleLayer = ({ vectorGridData }: MapboxParticleLayerProps
       map.on('moveend', () => particleRenderer.current?.startAnimation())
       map.on('resize', () => particleRenderer.current?.resizeTextures())
     } else {
-      particleRenderer.current.updateVectorField(vectorGridData)
+      particleRenderer.current.updateVectorField(vectorGrid)
     }
-  }, [vectorGridData, map])
+  }, [vectorGrid, map])
   return null
 }

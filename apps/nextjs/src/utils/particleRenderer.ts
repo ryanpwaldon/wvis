@@ -3,6 +3,8 @@ import type { ProgramInfo } from 'twgl.js'
 import { MercatorCoordinate } from 'mapbox-gl'
 import { createBufferInfoFromArrays, createProgramInfo, createTextures, drawBufferInfo, setBuffersAndAttributes, setUniforms } from 'twgl.js'
 
+import type { VectorGrid } from '~/hooks/useImageData'
+
 // Returns all pixels
 export const vQuad = /* glsl */ `
   precision highp float;
@@ -151,7 +153,7 @@ class ParticleRenderer {
 
   private map: Map
   private gl: WebGL2RenderingContext
-  private vectorFieldData?: ImageData
+  private vectorFieldData?: VectorGrid
   private screenDrawProgram?: ProgramInfo
   private particlesDrawProgram?: ProgramInfo
   private particlesUpdateProgram?: ProgramInfo
@@ -169,8 +171,8 @@ class ParticleRenderer {
     this.gl = gl
   }
 
-  public initialize(vectorFieldImage: ImageData): void {
-    this.vectorFieldData = vectorFieldImage
+  public initialize(vectorGrid: VectorGrid): void {
+    this.vectorFieldData = vectorGrid
     this.screenDrawProgram = createProgramInfo(this.gl, [vQuad, fScreenDraw])
     this.particlesDrawProgram = createProgramInfo(this.gl, [vParticlesDraw, fParticlesDraw])
     this.particlesUpdateProgram = createProgramInfo(this.gl, [vQuad, fParticlesUpdate])
@@ -180,10 +182,10 @@ class ParticleRenderer {
       vectorFieldTexture: {
         mag: this.gl.NEAREST,
         min: this.gl.NEAREST,
-        width: this.vectorFieldData.width,
-        height: this.vectorFieldData.height,
+        width: this.vectorFieldData.image.width,
+        height: this.vectorFieldData.image.height,
         format: this.gl.RGBA,
-        src: this.vectorFieldData.data,
+        src: this.vectorFieldData.image.data,
       },
       backgroundTexture: {
         mag: this.gl.NEAREST,
@@ -208,7 +210,7 @@ class ParticleRenderer {
     this.startAnimation()
   }
 
-  public updateVectorField(newVectorFieldImage: ImageData): void {
+  public updateVectorField(newVectorFieldImage: VectorGrid): void {
     if (!this.renderTextures) return console.error('Render textures not initialized')
     this.vectorFieldData = newVectorFieldImage
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.renderTextures.vectorFieldTexture)
@@ -216,12 +218,12 @@ class ParticleRenderer {
       this.gl.TEXTURE_2D,
       0,
       this.gl.RGBA,
-      this.vectorFieldData.width,
-      this.vectorFieldData.height,
+      this.vectorFieldData.image.width,
+      this.vectorFieldData.image.height,
       0,
       this.gl.RGBA,
       this.gl.UNSIGNED_BYTE,
-      this.vectorFieldData.data,
+      this.vectorFieldData.image.data,
     )
   }
 
@@ -316,10 +318,10 @@ class ParticleRenderer {
     const updateUniforms = {
       u_flow_field: this.renderTextures.vectorFieldTexture,
       u_particles: this.particleTextures.particleTextureSource,
-      u_flow_field_min_speed: [this.VECTOR_MAGNITUDE_RANGE[0], this.VECTOR_MAGNITUDE_RANGE[0]],
-      u_flow_field_max_speed: [this.VECTOR_MAGNITUDE_RANGE[1], this.VECTOR_MAGNITUDE_RANGE[1]],
+      u_flow_field_min_speed: [this.vectorFieldData.metadata.minU, this.vectorFieldData.metadata.minV],
+      u_flow_field_max_speed: [this.vectorFieldData.metadata.maxU, this.vectorFieldData.metadata.maxV],
       u_random_seed: Math.random(),
-      u_flow_field_res: [this.vectorFieldData.width, this.vectorFieldData.height - 1], // subtract 1 from height fix
+      u_flow_field_res: [this.vectorFieldData.image.width, this.vectorFieldData.image.height - 1], // subtract 1 from height fix
       u_speed_factor: this.PARTICLE_SPEED_FACTOR,
       u_drop_rate: this.PARTICLE_DROP_RATE,
       u_drop_rate_bump: this.PARTICLE_DROP_RATE_INCREASE,

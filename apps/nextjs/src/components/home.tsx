@@ -20,9 +20,9 @@ export const Home = () => {
   const [date, setDate] = useState<Date | null>(null)
   const [cursorLngLat, setCursorLngLat] = useState<[number, number] | null>(null)
   const [vectorGridId, setVectorGridId] = useState<VectorGridId>('wind')
-  const vectorGrid = useMemo(() => vectorGrids[vectorGridId], [vectorGridId])
-  const vectorGridUrl = useMemo(() => date && vectorGrid.url(date), [date, vectorGrid])
-  const { vectorGridData, queryVectorGrid } = useVectorGrid(vectorGridUrl, vectorGrid)
+  const vectorGridConfig = useMemo(() => vectorGrids[vectorGridId], [vectorGridId])
+  const vectorGridUrl = useMemo(() => date && vectorGridConfig.url(date), [date, vectorGridConfig])
+  const { vectorGrid, queryVectorGrid } = useVectorGrid(vectorGridUrl)
   const vectorGridPoint = useMemo(() => queryVectorGrid(cursorLngLat), [cursorLngLat, queryVectorGrid])
 
   const boundaryRef = useRef<HTMLDivElement | null>(null)
@@ -31,8 +31,8 @@ export const Home = () => {
     <div className="h-full w-full border p-4">
       <div ref={boundaryRef} className="flex h-full w-full flex-col divide-y overflow-hidden border">
         <Mapbox onCursorLngLatChange={setCursorLngLat}>
-          <MapboxParticleLayer vectorGridData={vectorGridData} />
-          <MapboxChoroplethLayer vectorGridData={vectorGridData} />
+          <MapboxParticleLayer vectorGrid={vectorGrid} />
+          <MapboxChoroplethLayer vectorGrid={vectorGrid} />
         </Mapbox>
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
           <div className="flex h-full items-center">
