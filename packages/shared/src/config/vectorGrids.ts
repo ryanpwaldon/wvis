@@ -10,8 +10,10 @@ export const vectorGrids = {
     decode([r, g, b, a]: [number, number, number, number]) {
       if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255 || a < 0 || a > 255) throw new Error('RGBA values must be in the range 0-255')
       // Decode U and V values from r and g channels
-      const u = (r / 255) * (this.magnitude.max - this.magnitude.min) + this.magnitude.min
-      const v = (g / 255) * (this.magnitude.max - this.magnitude.min) + this.magnitude.min
+      const minMagnitude = this.magnitude * -1
+      const maxMagnitude = this.magnitude
+      const u = (r / 255) * (maxMagnitude - minMagnitude) + minMagnitude
+      const v = (g / 255) * (maxMagnitude - minMagnitude) + minMagnitude
       // Calculate magnitude and direction
       const magnitude = Math.sqrt(u ** 2 + v ** 2)
       // Correct the direction to meteorological convention (0° is north)
@@ -19,10 +21,7 @@ export const vectorGrids = {
       direction = (direction + 360) % 360 // Normalize to [0, 360)
       return { direction, magnitude }
     },
-    magnitude: {
-      min: -100,
-      max: 100,
-    },
+    magnitude: 100 * Math.SQRT2,
   },
   waves: {
     id: 'waves',
@@ -36,7 +35,7 @@ export const vectorGrids = {
       const direction = 1
       return { direction, magnitude }
     },
-    magnitude: [-15, 15],
+    magnitude: 15 * Math.SQRT2,
   },
 } as const
 

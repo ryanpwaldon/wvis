@@ -1,5 +1,7 @@
 import ky from 'ky'
 
+import { vectorGrids } from '@sctv/shared'
+
 import { storageService } from '../services/storageService'
 import { dateFromParts } from '../utils/dateFromParts'
 import { generateFlowFieldImage } from '../utils/generateFlowFieldImage'
@@ -62,8 +64,7 @@ export const run = async () => {
       vValues: windV,
       width: 360,
       height: 181,
-      minMagnitude: -100,
-      maxMagnitude: 100,
+      magnitude: vectorGrids.wind.magnitude,
     })
     console.log('Image buffer generated for time index:', timeIndex)
     await storageService.uploadImage(buffer, 'wind', `${date.toISOString()}.png`)

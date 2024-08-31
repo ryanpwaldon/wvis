@@ -1,5 +1,7 @@
 import ky from 'ky'
 
+import { vectorGrids } from '@sctv/shared'
+
 import { storageService } from '../services/storageService'
 import { componentsToU } from '../utils/componentsToU'
 import { componentsToV } from '../utils/componentsToV'
@@ -68,8 +70,7 @@ export const run = async () => {
       vValues: wavesV,
       width: 360,
       height: 181,
-      minMagnitude: -15,
-      maxMagnitude: 15,
+      magnitude: vectorGrids.waves.magnitude,
     })
     console.log('Image buffer generated time index:', timeIndex)
     await storageService.uploadImage(buffer, 'waves', `${date.toISOString()}.png`)

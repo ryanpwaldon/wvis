@@ -20,7 +20,9 @@
     "ky": "catalog:",
     "tsx": "^4.17.0",
     "zod": "catalog:",
-    "@sctv/shared": "workspace:*"
+    "@sctv/shared": "workspace:*",
+    "d3-scale": "catalog:",
+    "d3-interpolate": "catalog:"
   },
   "devDependencies": {
     "@sctv/eslint-config": "workspace:*",
@@ -29,7 +31,9 @@
     "dotenv-cli": "^7.4.2",
     "eslint": "catalog:",
     "prettier": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@types/d3-scale": "catalog:",
+    "@types/d3-interpolate": "catalog:"
   },
   "prettier": "@sctv/prettier-config"
 }
