@@ -17,8 +17,6 @@ export const fs = /* glsl */ `
   precision highp float;
   uniform sampler2D u_flow_field;
   uniform vec2 u_flow_field_res;
-  uniform vec2 u_flow_field_min_speed;
-  uniform vec2 u_flow_field_max_speed;
   uniform vec4 u_map_mercator_bounds;
   varying vec2 v_tex_pos;
 
@@ -49,15 +47,13 @@ export const fs = /* glsl */ `
     float lng = lngLat.x;
     float lat = lngLat.y;
     vec2 flow_field_pos = vec2(lng / 360.0, (lat + 90.0) / 180.0);
-    vec2 velocity = mix(u_flow_field_min_speed, u_flow_field_max_speed, getVelocity(flow_field_pos));
-    float speed_t = length(velocity) / length(u_flow_field_max_speed);
+    vec2 velocity = getVelocity(flow_field_pos) * 2.0 - 1.0; // normalise between [-1, 1]
+    float speed_t = length(velocity) / sqrt(2.0); // divide by max length to get meaningful magnitude
     gl_FragColor = vec4(1.0, 1.0, 1.0, speed_t);
   }
 `
 
 export class ChoroplethRenderer {
-  private readonly VECTOR_MAGNITUDE_RANGE = [-200, 200] as const
-
   private map: Map
   private gl: WebGL2RenderingContext
   private flowFieldData?: ImageData
@@ -110,8 +106,6 @@ export class ChoroplethRenderer {
     setBuffersAndAttributes(this.gl, this.choroplethDrawProgram, choroplethQuadBufferInfo)
     setUniforms(this.choroplethDrawProgram, {
       u_flow_field: this.flowFieldTexture,
-      u_flow_field_min_speed: [this.VECTOR_MAGNITUDE_RANGE[0], this.VECTOR_MAGNITUDE_RANGE[0]],
-      u_flow_field_max_speed: [this.VECTOR_MAGNITUDE_RANGE[1], this.VECTOR_MAGNITUDE_RANGE[1]],
       u_flow_field_res: [this.flowFieldData.width, this.flowFieldData.height - 1], // subtract 1 from height fix
       u_map_mercator_bounds: this.mapMercatorBounds,
     })
