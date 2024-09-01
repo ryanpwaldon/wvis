@@ -42,7 +42,7 @@ export const vParticlesDraw = /* glsl */ `
     // convert color to x,y position, normalised between 0 and 1
     vec2 pos = vec2(color.r / 255.0 + color.b, color.g / 255.0 + color.a);
     // set particle size
-    gl_PointSize = 2.0;
+    gl_PointSize = 3.0;
     // normalise between -1 and 1. and, flip the y axis
     gl_Position = vec4(2.0 * pos.x - 1.0, 1.0 - 2.0 * pos.y, 0, 1);
   }
