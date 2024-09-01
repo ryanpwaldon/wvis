@@ -63,10 +63,10 @@ export const fParticlesDraw = /* glsl */ `
 export const fParticlesUpdate = /* glsl */ `
   precision highp float;
   uniform sampler2D u_particles;
-  uniform sampler2D u_flow_field;
-  uniform vec2 u_flow_field_res;
-  uniform vec2 u_flow_field_min_speed;
-  uniform vec2 u_flow_field_max_speed;
+  uniform sampler2D u_vector_grid;
+  uniform vec2 u_vector_grid_res;
+  uniform vec2 u_vector_grid_min_speed;
+  uniform vec2 u_vector_grid_max_speed;
   uniform vec4 u_map_mercator_bounds;
   uniform float u_speed_factor;
   uniform float u_drop_rate;
@@ -80,13 +80,13 @@ export const fParticlesUpdate = /* glsl */ `
   }
 
   vec2 getVelocity(const vec2 uv) {
-    vec2 px = 1.0 / u_flow_field_res; // px = size of one pixel
-    vec2 vc = (floor(uv * u_flow_field_res)) * px; // vc = top left coord
-    vec2 f = fract(uv * u_flow_field_res); // f = remainder
-    vec2 tl = texture2D(u_flow_field, vc).rg; // top left
-    vec2 tr = texture2D(u_flow_field, vc + vec2(px.x, 0)).rg; // top right
-    vec2 bl = texture2D(u_flow_field, vc + vec2(0, px.y)).rg; // bottom left
-    vec2 br = texture2D(u_flow_field, vc + px).rg; // bottom right
+    vec2 px = 1.0 / u_vector_grid_res; // px = size of one pixel
+    vec2 vc = (floor(uv * u_vector_grid_res)) * px; // vc = top left coord
+    vec2 f = fract(uv * u_vector_grid_res); // f = remainder
+    vec2 tl = texture2D(u_vector_grid, vc).rg; // top left
+    vec2 tr = texture2D(u_vector_grid, vc + vec2(px.x, 0)).rg; // top right
+    vec2 bl = texture2D(u_vector_grid, vc + vec2(0, px.y)).rg; // bottom left
+    vec2 br = texture2D(u_vector_grid, vc + px).rg; // bottom right
     return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y); // interpolate all 4 using remainder
   }
 
@@ -113,11 +113,11 @@ export const fParticlesUpdate = /* glsl */ `
     float lng = lngLat.x;
     float lat = lngLat.y;
     // get flow field pos, by normalising between 0 and 1
-    vec2 flow_field_pos = vec2(lng / 360.0, (lat + 90.0) / 180.0);
+    vec2 vector_grid_pos = vec2(lng / 360.0, (lat + 90.0) / 180.0);
     // normalise velocity between -100 and 100 (e.g. [-91, 34])
-    vec2 velocity = mix(u_flow_field_min_speed, u_flow_field_max_speed, getVelocity(flow_field_pos));
+    vec2 velocity = mix(u_vector_grid_min_speed, u_vector_grid_max_speed, getVelocity(vector_grid_pos));
     // get speed by dividing vector length, by max speed length
-    float speed_t = length(velocity) / length(u_flow_field_max_speed);
+    float speed_t = length(velocity) / length(u_vector_grid_max_speed);
     // get offset (distance to move particle). we must flip y to account for differing coordinate systems
     vec2 offset = vec2(velocity.x, -velocity.y) * 0.0001 * u_speed_factor;
     // update pos with offset
@@ -316,12 +316,12 @@ class ParticleRenderer {
     this.gl.useProgram(this.particlesUpdateProgram.program)
     const quadVertices = { a_pos: { numComponents: 2, data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]) } }
     const updateUniforms = {
-      u_flow_field: this.renderTextures.vectorFieldTexture,
+      u_vector_grid: this.renderTextures.vectorFieldTexture,
       u_particles: this.particleTextures.particleTextureSource,
-      u_flow_field_min_speed: [this.vectorFieldData.metadata.minU, this.vectorFieldData.metadata.minV],
-      u_flow_field_max_speed: [this.vectorFieldData.metadata.maxU, this.vectorFieldData.metadata.maxV],
+      u_vector_grid_min_speed: [this.vectorFieldData.metadata.minU, this.vectorFieldData.metadata.minV],
+      u_vector_grid_max_speed: [this.vectorFieldData.metadata.maxU, this.vectorFieldData.metadata.maxV],
       u_random_seed: Math.random(),
-      u_flow_field_res: [this.vectorFieldData.image.width - 1, this.vectorFieldData.image.height - 1], // subtract 1 from height/width fix (why? needs investigating)
+      u_vector_grid_res: [this.vectorFieldData.image.width - 1, this.vectorFieldData.image.height - 1], // subtract 1 from height/width fix (why? needs investigating)
       u_speed_factor: this.PARTICLE_SPEED_FACTOR,
       u_drop_rate: this.PARTICLE_DROP_RATE,
       u_drop_rate_bump: this.PARTICLE_DROP_RATE_INCREASE,
