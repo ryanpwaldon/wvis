@@ -24,7 +24,7 @@ export const MapboxChoroplethLayer = ({ vectorGrid }: MapboxChoroplethLayerProps
           onAdd: (map, gl) => {
             choroplethRenderer.current = new ChoroplethRenderer(map, gl)
             choroplethRenderer.current.updateMapBounds()
-            choroplethRenderer.current.setFlowField(vectorGrid)
+            choroplethRenderer.current.setVectorGrid(vectorGrid)
           },
           render: () => choroplethRenderer.current?.draw(),
         },
@@ -32,7 +32,7 @@ export const MapboxChoroplethLayer = ({ vectorGrid }: MapboxChoroplethLayerProps
       )
       map.on('move', () => choroplethRenderer.current?.updateMapBounds())
     } else {
-      choroplethRenderer.current.setFlowField(vectorGrid)
+      choroplethRenderer.current.setVectorGrid(vectorGrid)
     }
   }, [vectorGrid, map])
   return null

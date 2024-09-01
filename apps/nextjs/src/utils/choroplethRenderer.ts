@@ -60,8 +60,8 @@ export const fs = /* glsl */ `
 export class ChoroplethRenderer {
   private map: Map
   private gl: WebGL2RenderingContext
-  private flowFieldData?: VectorGrid
-  private flowFieldTexture: WebGLTexture
+  private vectorGrid?: VectorGrid
+  private vectorGridTexture: WebGLTexture
   private choroplethDrawProgram: ProgramInfo
   private mapMercatorBounds: [number, number, number, number] = [0, 0, 0, 0]
 
@@ -69,7 +69,7 @@ export class ChoroplethRenderer {
     this.map = map
     this.gl = gl
     this.choroplethDrawProgram = createProgramInfo(this.gl, [vs, fs])
-    this.flowFieldTexture = createTexture(this.gl, {
+    this.vectorGridTexture = createTexture(this.gl, {
       width: 1,
       height: 1,
       mag: this.gl.NEAREST,
@@ -79,19 +79,19 @@ export class ChoroplethRenderer {
     })
   }
 
-  public setFlowField(vectorGrid: VectorGrid) {
-    this.flowFieldData = vectorGrid
-    this.gl.bindTexture(this.gl.TEXTURE_2D, this.flowFieldTexture)
+  public setVectorGrid(vectorGrid: VectorGrid) {
+    this.vectorGrid = vectorGrid
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.vectorGridTexture)
     this.gl.texImage2D(
       this.gl.TEXTURE_2D,
       0,
       this.gl.RGBA,
-      this.flowFieldData.image.width,
-      this.flowFieldData.image.height,
+      this.vectorGrid.image.width,
+      this.vectorGrid.image.height,
       0,
       this.gl.RGBA,
       this.gl.UNSIGNED_BYTE,
-      this.flowFieldData.image,
+      this.vectorGrid.image,
     )
   }
 
@@ -104,7 +104,7 @@ export class ChoroplethRenderer {
   }
 
   public draw() {
-    if (!this.flowFieldData) return
+    if (!this.vectorGrid) return
     this.gl.enable(this.gl.BLEND)
     this.gl.disable(this.gl.DEPTH_TEST)
     this.gl.disable(this.gl.STENCIL_TEST)
@@ -114,10 +114,10 @@ export class ChoroplethRenderer {
     const choroplethQuadBufferInfo = createBufferInfoFromArrays(this.gl, { a_pos: { numComponents: 2, data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]) } }) // prettier-ignore
     setBuffersAndAttributes(this.gl, this.choroplethDrawProgram, choroplethQuadBufferInfo)
     setUniforms(this.choroplethDrawProgram, {
-      u_vector_grid: this.flowFieldTexture,
-      u_vector_grid_res: [this.flowFieldData.image.width, this.flowFieldData.image.height - 1], // subtract 1 from height fix
-      u_vector_grid_min_mag: [this.flowFieldData.metadata.minU, this.flowFieldData.metadata.minV],
-      u_vector_grid_max_mag: [this.flowFieldData.metadata.maxU, this.flowFieldData.metadata.maxV],
+      u_vector_grid: this.vectorGridTexture,
+      u_vector_grid_res: [this.vectorGrid.image.width, this.vectorGrid.image.height - 1], // subtract 1 from height fix
+      u_vector_grid_min_mag: [this.vectorGrid.metadata.minU, this.vectorGrid.metadata.minV],
+      u_vector_grid_max_mag: [this.vectorGrid.metadata.maxU, this.vectorGrid.metadata.maxV],
       u_map_mercator_bounds: this.mapMercatorBounds,
     })
     drawBufferInfo(this.gl, choroplethQuadBufferInfo)
