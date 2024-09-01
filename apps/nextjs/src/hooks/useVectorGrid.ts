@@ -17,7 +17,7 @@ export const useVectorGrid = (url: string | null) => {
       let [x, y] = scaleLngLat(lngLat, [0, adjustedWidth], [0, adjustedHeight])
       x = (x + adjustedWidth / 2) % adjustedWidth // offset x by 50%
       y = adjustedHeight - y // invert y axis
-      const [r, g] = getPointFromImageData.bilinear(vectorGrid.image, x, y)
+      const [r, g] = getPointFromImageData.bicubic(vectorGrid.image, x, y)
       const scaleR = scaleLinear().domain([0, 255]).range([vectorGrid.metadata.minU, vectorGrid.metadata.maxU])
       const scaleG = scaleLinear().domain([0, 255]).range([vectorGrid.metadata.minV, vectorGrid.metadata.maxV])
       const u = scaleR(r)

@@ -79,15 +79,89 @@ export const fParticlesUpdate = /* glsl */ `
     return fract(sin(t) * (4375.85453 + t));
   }
 
-  vec2 getVelocity(const vec2 uv) {
-    vec2 px = 1.0 / u_vector_grid_res; // px = size of one pixel
-    vec2 vc = (floor(uv * u_vector_grid_res)) * px; // vc = top left coord
-    vec2 f = fract(uv * u_vector_grid_res); // f = remainder
-    vec2 tl = texture2D(u_vector_grid, vc).rg; // top left
-    vec2 tr = texture2D(u_vector_grid, vc + vec2(px.x, 0)).rg; // top right
-    vec2 bl = texture2D(u_vector_grid, vc + vec2(0, px.y)).rg; // bottom left
-    vec2 br = texture2D(u_vector_grid, vc + px).rg; // bottom right
-    return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y); // interpolate all 4 using remainder
+  vec2 getVelocityBilinear(const vec2 uv) {
+    vec2 px = 1.0 / u_vector_grid_res;
+    vec2 vc = (floor(uv * u_vector_grid_res)) * px;
+    vec2 f = fract(uv * u_vector_grid_res);
+    vec2 tl = texture2D(u_vector_grid, vc).rg;
+    vec2 tr = texture2D(u_vector_grid, vc + vec2(px.x, 0)).rg;
+    vec2 bl = texture2D(u_vector_grid, vc + vec2(0, px.y)).rg;
+    vec2 br = texture2D(u_vector_grid, vc + px).rg;
+    return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
+  }
+
+  vec2 catmullRom(vec2 p0, vec2 p1, vec2 p2, vec2 p3, float t) {
+    float t2 = t * t;
+    float t3 = t2 * t;    
+    vec2 v0 = (p2 - p0) * 0.5;
+    vec2 v1 = (p3 - p1) * 0.5;
+    return (2.0 * p1 - 2.0 * p2 + v0 + v1) * t3 + (-3.0 * p1 + 3.0 * p2 - 2.0 * v0 - v1) * t2 + v0 * t + p1;
+  }
+
+  vec2 getVelocityCatmullRom(vec2 uv) {
+    vec2 px = 1.0 / u_vector_grid_res;
+    vec2 vc = floor(uv * u_vector_grid_res) * px;
+    vec2 f = fract(uv * u_vector_grid_res);
+    vec2 p00 = texture2D(u_vector_grid, vc + vec2(-px.x, -px.y)).rg;
+    vec2 p10 = texture2D(u_vector_grid, vc + vec2(0.0, -px.y)).rg;
+    vec2 p20 = texture2D(u_vector_grid, vc + vec2(px.x, -px.y)).rg;
+    vec2 p30 = texture2D(u_vector_grid, vc + vec2(2.0 * px.x, -px.y)).rg;
+    vec2 p01 = texture2D(u_vector_grid, vc + vec2(-px.x, 0.0)).rg;
+    vec2 p11 = texture2D(u_vector_grid, vc).rg;
+    vec2 p21 = texture2D(u_vector_grid, vc + vec2(px.x, 0.0)).rg;
+    vec2 p31 = texture2D(u_vector_grid, vc + vec2(2.0 * px.x, 0.0)).rg;
+    vec2 p02 = texture2D(u_vector_grid, vc + vec2(-px.x, px.y)).rg;
+    vec2 p12 = texture2D(u_vector_grid, vc + vec2(0.0, px.y)).rg;
+    vec2 p22 = texture2D(u_vector_grid, vc + vec2(px.x, px.y)).rg;
+    vec2 p32 = texture2D(u_vector_grid, vc + vec2(2.0 * px.x, px.y)).rg;
+    vec2 p03 = texture2D(u_vector_grid, vc + vec2(-px.x, 2.0 * px.y)).rg;
+    vec2 p13 = texture2D(u_vector_grid, vc + vec2(0.0, 2.0 * px.y)).rg;
+    vec2 p23 = texture2D(u_vector_grid, vc + vec2(px.x, 2.0 * px.y)).rg;
+    vec2 p33 = texture2D(u_vector_grid, vc + vec2(2.0 * px.x, 2.0 * px.y)).rg;
+    vec2 x0 = catmullRom(p00, p10, p20, p30, f.x);
+    vec2 x1 = catmullRom(p01, p11, p21, p31, f.x);
+    vec2 x2 = catmullRom(p02, p12, p22, p32, f.x);
+    vec2 x3 = catmullRom(p03, p13, p23, p33, f.x);
+    return catmullRom(x0, x1, x2, x3, f.y);
+  }
+
+  vec4 cubic(float v) {
+    vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
+    vec4 s = n * n * n;
+    float x = s.x;
+    float y = s.y - 4.0 * s.x;
+    float z = s.z - 4.0 * s.y + 6.0 * s.x;
+    float w = 6.0 - x - y - z;
+    return vec4(x, y, z, w) * (1.0/6.0);
+  }
+
+  vec2 getVelocityBicubic(vec2 uv) {
+    vec2 px = 1.0 / u_vector_grid_res;
+    vec2 vc = floor(uv * u_vector_grid_res) * px;
+    vec2 f = fract(uv * u_vector_grid_res);
+    vec4 x = cubic(f.x);
+    vec4 y = cubic(f.y);
+    vec2 c00 = texture2D(u_vector_grid, vc + vec2(-px.x, -px.y)).rg;
+    vec2 c10 = texture2D(u_vector_grid, vc + vec2(0.0, -px.y)).rg;
+    vec2 c20 = texture2D(u_vector_grid, vc + vec2(px.x, -px.y)).rg;
+    vec2 c30 = texture2D(u_vector_grid, vc + vec2(2.0 * px.x, -px.y)).rg;
+    vec2 c01 = texture2D(u_vector_grid, vc + vec2(-px.x, 0.0)).rg;
+    vec2 c11 = texture2D(u_vector_grid, vc + vec2(0.0, 0.0)).rg;
+    vec2 c21 = texture2D(u_vector_grid, vc + vec2(px.x, 0.0)).rg;
+    vec2 c31 = texture2D(u_vector_grid, vc + vec2(2.0 * px.x, 0.0)).rg;
+    vec2 c02 = texture2D(u_vector_grid, vc + vec2(-px.x, px.y)).rg;
+    vec2 c12 = texture2D(u_vector_grid, vc + vec2(0.0, px.y)).rg;
+    vec2 c22 = texture2D(u_vector_grid, vc + vec2(px.x, px.y)).rg;
+    vec2 c32 = texture2D(u_vector_grid, vc + vec2(2.0 * px.x, px.y)).rg;
+    vec2 c03 = texture2D(u_vector_grid, vc + vec2(-px.x, 2.0 * px.y)).rg;
+    vec2 c13 = texture2D(u_vector_grid, vc + vec2(0.0, 2.0 * px.y)).rg;
+    vec2 c23 = texture2D(u_vector_grid, vc + vec2(px.x, 2.0 * px.y)).rg;
+    vec2 c33 = texture2D(u_vector_grid, vc + vec2(2.0 * px.x, 2.0 * px.y)).rg;
+    vec2 row0 = c00 * x.x + c10 * x.y + c20 * x.z + c30 * x.w;
+    vec2 row1 = c01 * x.x + c11 * x.y + c21 * x.z + c31 * x.w;
+    vec2 row2 = c02 * x.x + c12 * x.y + c22 * x.z + c32 * x.w;
+    vec2 row3 = c03 * x.x + c13 * x.y + c23 * x.z + c33 * x.w;
+    return row0 * y.x + row1 * y.y + row2 * y.z + row3 * y.w;
   }
 
   vec2 getLngLat(float x_domain, float y_domain, vec2 pos) {
@@ -115,7 +189,7 @@ export const fParticlesUpdate = /* glsl */ `
     // get flow field pos, by normalising between 0 and 1
     vec2 vector_grid_pos = vec2(lng / 360.0, (lat + 90.0) / 180.0);
     // normalise velocity between -100 and 100 (e.g. [-91, 34])
-    vec2 velocity = mix(u_vector_grid_min_speed, u_vector_grid_max_speed, getVelocity(vector_grid_pos));
+    vec2 velocity = mix(u_vector_grid_min_speed, u_vector_grid_max_speed, getVelocityBicubic(vector_grid_pos));
     // get speed by dividing vector length, by max speed length
     float speed_t = length(velocity) / length(u_vector_grid_max_speed);
     // get offset (distance to move particle). we must flip y to account for differing coordinate systems
