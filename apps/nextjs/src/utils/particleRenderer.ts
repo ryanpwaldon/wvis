@@ -321,7 +321,7 @@ class ParticleRenderer {
       u_flow_field_min_speed: [this.vectorFieldData.metadata.minU, this.vectorFieldData.metadata.minV],
       u_flow_field_max_speed: [this.vectorFieldData.metadata.maxU, this.vectorFieldData.metadata.maxV],
       u_random_seed: Math.random(),
-      u_flow_field_res: [this.vectorFieldData.image.width, this.vectorFieldData.image.height - 1], // subtract 1 from height fix
+      u_flow_field_res: [this.vectorFieldData.image.width - 1, this.vectorFieldData.image.height - 1], // subtract 1 from height/width fix (why? needs investigating)
       u_speed_factor: this.PARTICLE_SPEED_FACTOR,
       u_drop_rate: this.PARTICLE_DROP_RATE,
       u_drop_rate_bump: this.PARTICLE_DROP_RATE_INCREASE,

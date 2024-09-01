@@ -12,9 +12,11 @@ export const useVectorGrid = (url: string | null) => {
   const queryVectorGrid = useCallback(
     (lngLat: [number, number] | null) => {
       if (!lngLat || !vectorGrid) return null
-      let [x, y] = scaleLngLat(lngLat, [0, vectorGrid.image.width], [0, vectorGrid.image.height - 1]) // subtract 1 from height fix
-      x = (x + vectorGrid.image.width / 2) % vectorGrid.image.width // offset x by 50%
-      y = vectorGrid.image.height - 1 - y // invert y axis
+      const adjustedWidth = vectorGrid.image.width - 1 // subtract 1 from width fix (why? needs investigating)
+      const adjustedHeight = vectorGrid.image.height - 1 // subtract 1 from width fix (why? needs investigating)
+      let [x, y] = scaleLngLat(lngLat, [0, adjustedWidth], [0, adjustedHeight])
+      x = (x + adjustedWidth / 2) % adjustedWidth // offset x by 50%
+      y = adjustedHeight - y // invert y axis
       const [r, g] = getPointFromImageData.bilinear(vectorGrid.image, x, y)
       const scaleR = scaleLinear().domain([0, 255]).range([vectorGrid.metadata.minU, vectorGrid.metadata.maxU])
       const scaleG = scaleLinear().domain([0, 255]).range([vectorGrid.metadata.minV, vectorGrid.metadata.maxV])
