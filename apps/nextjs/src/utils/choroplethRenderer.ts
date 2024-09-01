@@ -1,5 +1,7 @@
 import type { Map } from 'mapbox-gl'
 import type { ProgramInfo } from 'twgl.js'
+import { rgb } from 'd3-color'
+import { interpolateTurbo } from 'd3-scale-chromatic'
 import { MercatorCoordinate } from 'mapbox-gl'
 import { createBufferInfoFromArrays, createProgramInfo, createTexture, drawBufferInfo, setBuffersAndAttributes, setUniforms } from 'twgl.js'
 
@@ -17,6 +19,7 @@ export const vs = /* glsl */ `
 
 export const fs = /* glsl */ `
   precision highp float;
+  uniform sampler2D u_color_ramp;
   uniform sampler2D u_vector_grid;
   uniform vec2 u_vector_grid_res;
   uniform vec2 u_vector_grid_min_mag;
@@ -52,8 +55,9 @@ export const fs = /* glsl */ `
     float lat = lngLat.y;
     vec2 vector_grid_pos = vec2(lng / 360.0, (lat + 90.0) / 180.0);
     vec2 velocity = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, getVelocity(vector_grid_pos));
-    float magnitude = length(velocity) / length(u_vector_grid_max_mag);
-    gl_FragColor = vec4(1.0, 1.0, 1.0, magnitude * 0.1);
+    float magnitude = length(velocity) / 25.0;
+    vec4 color = texture2D(u_color_ramp, vec2(magnitude, 0.5));
+    gl_FragColor = vec4(color.rgb, 0.5);
   }
 `
 
@@ -61,6 +65,7 @@ export class ChoroplethRenderer {
   private map: Map
   private gl: WebGL2RenderingContext
   private vectorGrid?: VectorGrid
+  private colorRampTexture: WebGLTexture
   private vectorGridTexture: WebGLTexture
   private choroplethDrawProgram: ProgramInfo
   private mapMercatorBounds: [number, number, number, number] = [0, 0, 0, 0]
@@ -77,6 +82,21 @@ export class ChoroplethRenderer {
       wrapS: this.gl.REPEAT,
       wrapT: this.gl.CLAMP_TO_EDGE,
     })
+    this.colorRampTexture = this.createColorRampTexture()
+  }
+
+  private createColorRampTexture() {
+    const size = 256
+    const pixels = new Uint8Array(size * 4)
+    for (let i = 0; i < size; i++) {
+      const t = i / (size - 1)
+      const color = rgb(interpolateTurbo(t))
+      pixels[i * 4] = color.r
+      pixels[i * 4 + 1] = color.g
+      pixels[i * 4 + 2] = color.b
+      pixels[i * 4 + 3] = 255
+    }
+    return createTexture(this.gl, { src: pixels, width: size, height: 1, mag: this.gl.NEAREST, min: this.gl.NEAREST, wrap: this.gl.CLAMP_TO_EDGE })
   }
 
   public setVectorGrid(vectorGrid: VectorGrid) {
@@ -114,6 +134,7 @@ export class ChoroplethRenderer {
     const choroplethQuadBufferInfo = createBufferInfoFromArrays(this.gl, { a_pos: { numComponents: 2, data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]) } }) // prettier-ignore
     setBuffersAndAttributes(this.gl, this.choroplethDrawProgram, choroplethQuadBufferInfo)
     setUniforms(this.choroplethDrawProgram, {
+      u_color_ramp: this.colorRampTexture,
       u_vector_grid: this.vectorGridTexture,
       u_vector_grid_res: [this.vectorGrid.image.width, this.vectorGrid.image.height - 1], // subtract 1 from height fix
       u_vector_grid_min_mag: [this.vectorGrid.metadata.minU, this.vectorGrid.metadata.minV],

@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from 'react'
 import { format, formatDistanceToNow } from 'date-fns'
 
 import type { VectorGridId } from '@sctv/shared'
-import { convertSpeed, degreesToCompass, vectorGridConfigs } from '@sctv/shared'
+import { degreesToCompass, vectorGridConfigs } from '@sctv/shared'
 import { Button } from '@sctv/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@sctv/ui/dropdown-menu'
 import { ThemeToggle } from '@sctv/ui/theme'
@@ -31,8 +31,8 @@ export const Home = () => {
     <div className="h-full w-full border p-4">
       <div ref={boundaryRef} className="flex h-full w-full flex-col divide-y overflow-hidden border">
         <Mapbox onCursorLngLatChange={setCursorLngLat}>
-          <MapboxParticleLayer vectorGrid={vectorGrid} />
           <MapboxChoroplethLayer vectorGrid={vectorGrid} />
+          <MapboxParticleLayer vectorGrid={vectorGrid} />
         </Mapbox>
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
           <div className="flex h-full items-center">
@@ -41,7 +41,7 @@ export const Home = () => {
           <div className="flex h-full items-center">
             {vectorGridPoint && (
               <div className="flex h-full items-center border-r px-2">
-                {degreesToCompass(vectorGridPoint.direction)}, {convertSpeed(vectorGridPoint.magnitude, 'mps', 'kph').toFixed(2)}
+                {degreesToCompass(vectorGridPoint.direction)}, {vectorGridPoint.magnitude.toFixed(2)}
               </div>
             )}
             <Tooltip delayDuration={0}>

@@ -14,6 +14,7 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
+    "@lunapaint/png-codec": "catalog:",
     "@radix-ui/react-slider": "^1.2.0",
     "@sctv/api": "workspace:*",
     "@sctv/auth": "workspace:*",
@@ -25,6 +26,9 @@
     "@trpc/client": "catalog:",
     "@trpc/react-query": "catalog:",
     "@trpc/server": "catalog:",
+    "d3-color": "^3.1.0",
+    "d3-scale": "catalog:",
+    "d3-scale-chromatic": "^3.1.0",
     "date-fns": "catalog:",
     "geist": "^1.3.0",
     "mapbox-gl": "^3.5.2",
@@ -33,9 +37,7 @@
     "react-dom": "catalog:react18",
     "superjson": "2.2.1",
     "twgl.js": "^5.5.4",
-    "zod": "catalog:",
-    "@lunapaint/png-codec": "catalog:",
-    "d3-scale": "catalog:"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@sctv/eslint-config": "workspace:*",
@@ -43,6 +45,8 @@
     "@sctv/shared": "workspace:*",
     "@sctv/tailwind-config": "workspace:*",
     "@sctv/tsconfig": "workspace:*",
+    "@types/d3-color": "^3.1.3",
+    "@types/d3-scale-chromatic": "^3.0.3",
     "@types/node": "^20.14.9",
     "@types/react": "catalog:react18",
     "@types/react-dom": "catalog:react18",
