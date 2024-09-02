@@ -15,7 +15,7 @@ export const vectorGridConfigs = {
     url(date: Date) {
       return `${CLOUDFLARE_BUCKET_URL}/${this.id}/${date.toISOString()}.png`
     },
-    colorRampMaxMag: 10,
+    colorRampMaxMag: 8,
   },
 } as const
 
