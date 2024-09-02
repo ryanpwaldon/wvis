@@ -21,8 +21,7 @@ export const Home = () => {
   const [cursorLngLat, setCursorLngLat] = useState<[number, number] | null>(null)
   const [vectorGridId, setVectorGridId] = useState<VectorGridId>('wind')
   const vectorGridConfig = useMemo(() => vectorGridConfigs[vectorGridId], [vectorGridId])
-  const vectorGridUrl = useMemo(() => date && vectorGridConfig.url(date), [date, vectorGridConfig])
-  const { vectorGrid, queryVectorGrid } = useVectorGrid(vectorGridUrl)
+  const { vectorGrid, queryVectorGrid } = useVectorGrid({ vectorGridId, date })
   const vectorGridPoint = useMemo(() => queryVectorGrid(cursorLngLat), [cursorLngLat, queryVectorGrid])
   const { colorRamp } = useColorRamp({ palette: 'turbo' })
 
@@ -71,7 +70,7 @@ export const Home = () => {
               </div>
             )}
             <div className="h-full w-[300px]">
-              <Legend colorRamp={colorRamp} min={0} max={100} steps={10} />
+              <Legend colorRamp={colorRamp} min={0} max={vectorGridConfig.colorRampMaxMag} steps={10} />
             </div>
           </div>
         </div>

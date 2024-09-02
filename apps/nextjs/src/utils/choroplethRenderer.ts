@@ -5,7 +5,7 @@ import { interpolateTurbo } from 'd3-scale-chromatic'
 import { MercatorCoordinate } from 'mapbox-gl'
 import { createBufferInfoFromArrays, createProgramInfo, createTexture, drawBufferInfo, setBuffersAndAttributes, setUniforms } from 'twgl.js'
 
-import type { VectorGrid } from '~/hooks/useImageData'
+import type { VectorGrid } from '~/hooks/useVectorGrid'
 
 export const vs = /* glsl */ `
   precision highp float;
@@ -21,6 +21,7 @@ export const fs = /* glsl */ `
   precision highp float;
   uniform sampler2D u_color_ramp;
   uniform sampler2D u_vector_grid;
+  uniform float u_color_ramp_max_mag;
   uniform vec2 u_vector_grid_res;
   uniform vec2 u_vector_grid_min_mag;
   uniform vec2 u_vector_grid_max_mag;
@@ -129,7 +130,7 @@ export const fs = /* glsl */ `
     float lat = lngLat.y;
     vec2 vector_grid_pos = vec2(lng / 360.0, (lat + 90.0) / 180.0);
     vec2 velocity = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, getVelocityBicubic(vector_grid_pos));
-    float magnitude = length(velocity) / 25.0;
+    float magnitude = length(velocity) / u_color_ramp_max_mag;
     vec4 color = texture2D(u_color_ramp, vec2(magnitude, 0.5));
     gl_FragColor = vec4(color.rgb, 0.5);
   }
@@ -213,6 +214,7 @@ export class ChoroplethRenderer {
       u_vector_grid_res: [this.vectorGrid.image.width - 1, this.vectorGrid.image.height - 1], // subtract 1 from height/width fix (why? needs investigating)
       u_vector_grid_min_mag: [this.vectorGrid.metadata.minU, this.vectorGrid.metadata.minV],
       u_vector_grid_max_mag: [this.vectorGrid.metadata.maxU, this.vectorGrid.metadata.maxV],
+      u_color_ramp_max_mag: this.vectorGrid.config.colorRampMaxMag,
       u_map_mercator_bounds: this.mapMercatorBounds,
     })
     drawBufferInfo(this.gl, choroplethQuadBufferInfo)

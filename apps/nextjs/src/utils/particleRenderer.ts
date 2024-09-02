@@ -3,7 +3,7 @@ import type { ProgramInfo } from 'twgl.js'
 import { MercatorCoordinate } from 'mapbox-gl'
 import { createBufferInfoFromArrays, createProgramInfo, createTextures, drawBufferInfo, setBuffersAndAttributes, setUniforms } from 'twgl.js'
 
-import type { VectorGrid } from '~/hooks/useImageData'
+import type { VectorGrid } from '~/hooks/useVectorGrid'
 
 // Returns all pixels
 export const vQuad = /* glsl */ `

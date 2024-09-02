@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 
-import type { VectorGrid } from '~/hooks/useImageData'
+import type { VectorGrid } from '~/hooks/useVectorGrid'
 import { useMapbox } from '~/hooks/useMapbox'
 import { ParticleRenderer } from '~/utils/particleRenderer'
 
