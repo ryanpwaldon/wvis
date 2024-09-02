@@ -69,9 +69,7 @@ export const Home = () => {
                 {degreesToCompass(vectorGridPoint.direction)}, {vectorGridPoint.magnitude.toFixed(2)}
               </div>
             )}
-            <div className="h-full w-[300px]">
-              <Legend colorRamp={colorRamp} min={0} max={vectorGridConfig.colorRampMaxMag} steps={10} />
-            </div>
+            <div className="h-full w-[300px]">{vectorGrid && <Legend colorRamp={colorRamp} min={0} max={vectorGrid.config.colorRampMaxMag} steps={10} />}</div>
           </div>
         </div>
       </div>

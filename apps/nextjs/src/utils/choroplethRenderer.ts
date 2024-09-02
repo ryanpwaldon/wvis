@@ -175,19 +175,15 @@ export class ChoroplethRenderer {
   }
 
   public setVectorGrid(vectorGrid: VectorGrid) {
-    this.vectorGrid = vectorGrid
+    const { width, height, data } = vectorGrid.image
+    const { width: currWidth, height: currHeight } = this.vectorGrid?.image ?? { width: null, height: null }
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.vectorGridTexture)
-    this.gl.texImage2D(
-      this.gl.TEXTURE_2D,
-      0,
-      this.gl.RGBA,
-      this.vectorGrid.image.width,
-      this.vectorGrid.image.height,
-      0,
-      this.gl.RGBA,
-      this.gl.UNSIGNED_BYTE,
-      this.vectorGrid.image,
-    )
+    if (currWidth === width && currHeight === height) {
+      this.gl.texSubImage2D(this.gl.TEXTURE_2D, 0, 0, 0, width, height, this.gl.RGBA, this.gl.UNSIGNED_BYTE, data)
+    } else {
+      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, width, height, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, data)
+    }
+    this.vectorGrid = vectorGrid
   }
 
   public updateMapBounds() {
