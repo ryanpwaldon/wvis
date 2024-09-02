@@ -1,14 +1,12 @@
 'use client'
 
 import { useMemo, useRef, useState } from 'react'
-import { format, formatDistanceToNow } from 'date-fns'
 
 import type { VectorGridId } from '@sctv/shared'
 import { degreesToCompass, vectorGridConfigs } from '@sctv/shared'
 import { Button } from '@sctv/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@sctv/ui/dropdown-menu'
 import { ThemeToggle } from '@sctv/ui/theme'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@sctv/ui/tooltip'
 
 import { Mapbox } from '~/components/mapbox'
 import { useVectorGrid } from '~/hooks/useVectorGrid'
@@ -30,33 +28,29 @@ export const Home = () => {
   return (
     <div className="h-full w-full border p-4">
       <div ref={boundaryRef} className="flex h-full w-full flex-col divide-y overflow-hidden border">
+        <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
+          <div className="flex h-full items-center">
+            <div className="flex h-full items-center border-r px-2">SCTV</div>
+          </div>
+          <div className="flex h-full items-center">
+            <div className="border-l">
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
         <Mapbox onCursorLngLatChange={setCursorLngLat}>
           <MapboxChoroplethLayer vectorGrid={vectorGrid} />
           <MapboxParticleLayer vectorGrid={vectorGrid} />
         </Mapbox>
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
           <div className="flex h-full items-center">
-            <div className="px-2">{date ? format(date, 'EEEE d MMMM h:mm a') : ''}</div>
-          </div>
-          <div className="flex h-full items-center">
-            {vectorGridPoint && (
-              <div className="flex h-full items-center border-r px-2">
-                {degreesToCompass(vectorGridPoint.direction)}, {vectorGridPoint.magnitude.toFixed(2)}
-              </div>
-            )}
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger className="h-full border-r px-2">GFS / {formatDistanceToNow(new Date(), { addSuffix: true })}</TooltipTrigger>
-              <TooltipContent sideOffset={2} collisionBoundary={boundaryRef.current}>
-                Updated {format(new Date(), 'EEEE d MMMM h:mm a')}
-              </TooltipContent>
-            </Tooltip>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button className="h-8 border-r px-2 text-xs font-light" variant="ghost">
-                  Layer
+                  {vectorGridConfig.title}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent sideOffset={2} align="end">
+              <DropdownMenuContent sideOffset={3} alignOffset={2} align="start">
                 <DropdownMenuRadioGroup value={vectorGridId} onValueChange={setVectorGridId as (value: string) => void}>
                   {Object.values(vectorGridConfigs).map((layer) => (
                     <DropdownMenuRadioItem key={layer.id} value={layer.id}>
@@ -66,7 +60,13 @@ export const Home = () => {
                 </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
-            <ThemeToggle />
+          </div>
+          <div className="flex h-full items-center">
+            {vectorGridPoint && (
+              <div className="flex h-full items-center border-r px-2">
+                {degreesToCompass(vectorGridPoint.direction)}, {vectorGridPoint.magnitude.toFixed(2)}
+              </div>
+            )}
           </div>
         </div>
       </div>
