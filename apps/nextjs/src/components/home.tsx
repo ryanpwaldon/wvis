@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from 'react'
 
 import type { VectorGridId } from '@sctv/shared'
-import { degreesToCompass, vectorGridConfigs } from '@sctv/shared'
+import { convertDistance, degreesToCompass, vectorGridConfigs } from '@sctv/shared'
 import { Button } from '@sctv/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@sctv/ui/dropdown-menu'
 import { ThemeToggle } from '@sctv/ui/theme'
@@ -66,7 +66,7 @@ export const Home = () => {
           <div className="flex h-full items-center">
             {vectorGridPoint && (
               <div className="flex h-full items-center border-r px-2">
-                {degreesToCompass(vectorGridPoint.direction)}, {vectorGridPoint.magnitude.toFixed(2)}
+                {degreesToCompass(vectorGridPoint.direction)}, {convertDistance(vectorGridPoint.magnitude, 'meters', 'feet').toFixed(0)}
               </div>
             )}
             <div className="h-full w-[300px]">{vectorGrid && <Legend colorRamp={colorRamp} min={0} max={vectorGrid.config.colorRampMaxMag} steps={10} />}</div>
