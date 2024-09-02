@@ -9,7 +9,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenu
 import { ThemeToggle } from '@sctv/ui/theme'
 
 import { Mapbox } from '~/components/mapbox'
+import { useColorRamp } from '~/hooks/useColorRamp'
 import { useVectorGrid } from '~/hooks/useVectorGrid'
+import { Legend } from './legend'
 import { MapboxChoroplethLayer } from './mapbox-choropleth-layer'
 import { MapboxParticleLayer } from './mapbox-particle-layer'
 import { Timeline } from './timeline'
@@ -22,6 +24,7 @@ export const Home = () => {
   const vectorGridUrl = useMemo(() => date && vectorGridConfig.url(date), [date, vectorGridConfig])
   const { vectorGrid, queryVectorGrid } = useVectorGrid(vectorGridUrl)
   const vectorGridPoint = useMemo(() => queryVectorGrid(cursorLngLat), [cursorLngLat, queryVectorGrid])
+  const { colorRamp } = useColorRamp({ palette: 'turbo' })
 
   const boundaryRef = useRef<HTMLDivElement | null>(null)
 
@@ -67,6 +70,9 @@ export const Home = () => {
                 {degreesToCompass(vectorGridPoint.direction)}, {vectorGridPoint.magnitude.toFixed(2)}
               </div>
             )}
+            <div className="h-full w-[300px]">
+              <Legend colorRamp={colorRamp} min={0} max={100} steps={10} />
+            </div>
           </div>
         </div>
       </div>
