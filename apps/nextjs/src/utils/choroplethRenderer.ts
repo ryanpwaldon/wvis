@@ -210,7 +210,7 @@ export class ChoroplethRenderer {
       u_vector_grid_res: [this.vectorGrid.image.width - 1, this.vectorGrid.image.height - 1], // subtract 1 from height/width fix (why? needs investigating)
       u_vector_grid_min_mag: [this.vectorGrid.metadata.minU, this.vectorGrid.metadata.minV],
       u_vector_grid_max_mag: [this.vectorGrid.metadata.maxU, this.vectorGrid.metadata.maxV],
-      u_color_ramp_max_mag: this.vectorGrid.config.colorRampMaxMag,
+      u_color_ramp_max_mag: this.vectorGrid.config.magMax,
       u_map_mercator_bounds: this.mapMercatorBounds,
     })
     drawBufferInfo(this.gl, choroplethQuadBufferInfo)

@@ -64,12 +64,12 @@ export const Home = () => {
             </DropdownMenu>
           </div>
           <div className="flex h-full items-center">
-            {vectorGridPoint && (
+            {/* {vectorGridPoint && (
               <div className="flex h-full items-center border-r px-2">
                 {degreesToCompass(vectorGridPoint.direction)}, {convertDistance(vectorGridPoint.magnitude, 'meters', 'feet').toFixed(0)}
               </div>
-            )}
-            <div className="h-full w-[300px]">{vectorGrid && <Legend colorRamp={colorRamp} min={0} max={vectorGrid.config.colorRampMaxMag} steps={10} />}</div>
+            )} */}
+            <div className="h-full w-[300px]">{vectorGrid && <Legend colorRamp={colorRamp} min={0} max={vectorGrid.config.magMax} steps={6} />}</div>
           </div>
         </div>
       </div>
