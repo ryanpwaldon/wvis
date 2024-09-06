@@ -1,9 +1,9 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
-import type { VectorGridId } from '@sctv/shared'
-import { convertDistance, degreesToCompass, vectorGridConfigs } from '@sctv/shared'
+import type { Unit, VectorGridId } from '@sctv/shared'
+import { convertUnit, degreesToCompass, vectorGridConfigs } from '@sctv/shared'
 import { Button } from '@sctv/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@sctv/ui/dropdown-menu'
 import { ThemeToggle } from '@sctv/ui/theme'
@@ -15,6 +15,7 @@ import { Legend } from './legend'
 import { MapboxChoroplethLayer } from './mapbox-choropleth-layer'
 import { MapboxParticleLayer } from './mapbox-particle-layer'
 import { Timeline } from './timeline'
+import { UnitSelect } from './unit-select'
 
 export const Home = () => {
   const [date, setDate] = useState<Date | null>(null)
@@ -22,6 +23,9 @@ export const Home = () => {
   const [vectorGridId, setVectorGridId] = useState<VectorGridId>('wind')
   const vectorGridConfig = useMemo(() => vectorGridConfigs[vectorGridId], [vectorGridId])
   const { vectorGrid, queryVectorGrid } = useVectorGrid({ vectorGridId, date })
+  const [unit, setUnit] = useState<Unit | null>(null)
+  useEffect(() => setUnit(vectorGrid?.config.units.base ?? null), [vectorGrid])
+
   const vectorGridPoint = useMemo(() => queryVectorGrid(cursorLngLat), [cursorLngLat, queryVectorGrid])
   const { colorRamp } = useColorRamp({ palette: 'turbo' })
 
@@ -64,12 +68,19 @@ export const Home = () => {
             </DropdownMenu>
           </div>
           <div className="flex h-full items-center">
-            {/* {vectorGridPoint && (
+            {vectorGridPoint && vectorGrid && unit && (
               <div className="flex h-full items-center border-r px-2">
-                {degreesToCompass(vectorGridPoint.direction)}, {convertDistance(vectorGridPoint.magnitude, 'meters', 'feet').toFixed(0)}
+                {degreesToCompass(vectorGridPoint.direction)}, {convertUnit(vectorGridPoint.magnitude, vectorGrid.config.units.base, unit).toFixed(0)}
               </div>
-            )} */}
-            <div className="h-full w-[300px]">{vectorGrid && <Legend colorRamp={colorRamp} min={0} max={vectorGrid.config.magMax} steps={6} />}</div>
+            )}
+            <div className="h-full">
+              {vectorGrid && unit && <UnitSelect value={unit} onChange={(value) => setUnit(value as Unit)} options={[...vectorGrid.config.units.options]} />}
+            </div>
+            <div className="h-full w-[300px]">
+              {vectorGrid && unit && (
+                <Legend colorRamp={colorRamp} min={0} max={convertUnit(vectorGrid.config.magMax, vectorGrid.config.units.base, unit)} steps={6} />
+              )}
+            </div>
           </div>
         </div>
       </div>

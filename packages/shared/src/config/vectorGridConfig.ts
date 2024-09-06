@@ -1,10 +1,5 @@
 import { CLOUDFLARE_BUCKET_URL } from '../constants'
 
-const units = {
-  speed: ['mps', 'kmph', 'mph', 'kts'],
-  height: ['m', 'ft'],
-}
-
 export const vectorGridConfigs = {
   wind: {
     id: 'wind',
@@ -13,8 +8,15 @@ export const vectorGridConfigs = {
       return `${CLOUDFLARE_BUCKET_URL}/${this.id}/${date.toISOString()}.png`
     },
     magMax: 25,
-    magBaseUnit: 'mps',
-    magUnits: units.speed,
+    units: {
+      base: 'mps',
+      options: [
+        { display: 'MPS', value: 'mps' },
+        { display: 'MPH', value: 'mph' },
+        { display: 'KPH', value: 'kph' },
+        { display: 'KTS', value: 'kts' },
+      ],
+    },
   },
   waves: {
     id: 'waves',
@@ -23,8 +25,13 @@ export const vectorGridConfigs = {
       return `${CLOUDFLARE_BUCKET_URL}/${this.id}/${date.toISOString()}.png`
     },
     magMax: 8,
-    magBaseUnit: 'm',
-    magUnits: units.height,
+    units: {
+      base: 'm',
+      options: [
+        { display: 'M', value: 'm' },
+        { display: 'FT', value: 'ft' },
+      ],
+    },
   },
 } as const
 
