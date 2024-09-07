@@ -40,7 +40,7 @@ export const Home = () => {
   )
 
   return (
-    <div className="h-full w-full border p-4">
+    <div className="h-full w-full p-4">
       <div ref={boundaryRef} className="flex h-full w-full flex-col divide-y overflow-hidden border">
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
           <div className="flex h-full items-center border-r px-2">SCTV</div>
@@ -51,7 +51,7 @@ export const Home = () => {
           <MapboxParticleLayer vectorGrid={vectorGrid} />
         </Mapbox>
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
-          <Timeline onChange={setDate} interval={3} days={7} />
+          <Timeline onChange={setDate} days={5} />
         </div>
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
           <LayerSelect value={vectorGridId} onChange={setVectorGridId as (value: string) => void} options={layerOptions} />

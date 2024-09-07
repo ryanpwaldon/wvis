@@ -1,123 +1,80 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import * as Slider from '@radix-ui/react-slider'
-import { addHours, closestIndexTo, startOfDay, startOfHour } from 'date-fns'
+import { addHours, closestIndexTo, format, startOfDay } from 'date-fns'
 
 import { cn } from '@sctv/ui'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@sctv/ui/tooltip'
+
+const UTC_HOUR_START = 0 // 12am UTC
+const UTC_HOUR_INTERVAL = 3
 
 interface TimelineProps {
-  onChange: (date: Date) => void
   days: number
-  interval: number
+  onChange: (value: Date) => void
+  className?: string
 }
 
-export const Timeline = ({ onChange, days, interval }: TimelineProps) => {
-  const dates = useMemo(() => generateDateIntervals(days, 1), [days])
-  // const formattedDates = useMemo(() => getFormattedDates(dates), [dates])
-  const [index, setIndex] = useState(getClosestDateIndex(dates))
-
-  useEffect(() => {
-    const date = roundToInterval(dates[index] as unknown as Date, interval)
-    onChange(date)
-  }, [dates, index, interval, onChange])
+export const Timeline = ({ days, onChange, className }: TimelineProps) => {
+  const now = new Date()
+  const max = days * 24
+  const dates = Array(max + 1).fill(null).map((_, i) => addHours(startOfDay(now), i)) // prettier-ignore
+  const validDates = dates.map((date) => (new Date(date.toUTCString()).getUTCHours() % UTC_HOUR_INTERVAL === UTC_HOUR_START ? date : null))
+  const clamp = (index: number) => closestDateIndex(dates[index], validDates)
+  const [index, setIndex] = useState(closestDateIndex(now, validDates))
+  const handleIndexChange = ([index]: [number]) => {
+    setIndex(index)
+    onChange(dates[clamp(index)]!)
+    console.log(dates[clamp(index)]!)
+  }
 
   return (
-    <div className="relative flex h-full w-full touch-none select-none items-center rounded-full px-2">
-      <Slider.Root
-        min={0}
-        max={dates.length - 1}
-        value={[index]}
-        onValueChange={(value) => setIndex(value[0] as unknown as number)}
-        className="relative flex h-full w-full touch-none select-none items-center"
-      >
-        {dates.map((_, i) => {
-          if (i % 24 !== 0) return
-          return (
-            <div
-              key={i}
-              className={cn('absolute h-1 w-1 -translate-x-1/2 rounded-full bg-primary/30')}
-              style={{ left: calcStepMarkOffset(i, dates.length - 1) }}
-            />
-          )
-        })}
-        <div className="h-full w-full [&>*]:flex [&>*]:h-full [&>*]:items-center">
-          <Slider.Thumb className="block h-1/2 w-2 border bg-foreground focus-visible:outline-none" />
-        </div>
+    <div className={cn('relative h-full w-full px-4', className)}>
+      <Slider.Root step={1} min={0} max={max} value={[index]} onValueChange={handleIndexChange} className="relative flex h-full w-full touch-none select-none">
+        <Ticks divisions={5} subdivisions={24} className="absolute left-0 top-0" />
+        <Slider.Track className="relative h-full grow">
+          <Slider.Range className="absolute h-full">
+            <Tooltip open>
+              <TooltipTrigger asChild>
+                <div className="absolute right-0 flex h-full translate-x-1/2 items-center">
+                  <div className="h-2/3 w-1 rounded-full bg-yellow-400" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="border p-0" sideOffset={0} align="center">
+                <div className="flex divide-x p-0">
+                  <div className="px-2 py-1.5">{format(dates[index]!, 'EEE d')}</div>
+                  <div className="px-2 py-1.5">{format(dates[index]!, 'ha')}</div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </Slider.Range>
+        </Slider.Track>
       </Slider.Root>
     </div>
   )
 }
 
-const roundToInterval = (date: Date, interval: number) => {
-  const currentHour = date.getUTCHours()
-  const roundedHour = Math.round(currentHour / interval) * interval
-  return addHours(startOfHour(date), roundedHour - currentHour)
+const closestDateIndex = (date: Date | undefined, dates: Array<Date | null>) => {
+  if (!date) throw new Error('Date is undefined.')
+  const index = closestIndexTo(date, dates.map((date) => date ?? 0)) // prettier-ignore
+  if (index === undefined) throw new Error('No closest index found.')
+  return index
 }
 
-const generateDateIntervals = (days: number, interval: number): Date[] => {
-  if (24 % interval !== 0) throw new Error(`The interval must be a divisor of 24. The provided interval (${interval}) is invalid.`)
-  const intervals: Date[] = []
-  const now = new Date()
-  const startDate = startOfDay(now)
-  for (let hour = 0; hour <= days * 24; hour += interval) intervals.push(addHours(startDate, hour))
-  return intervals
+interface TicksProps {
+  divisions: number
+  subdivisions: number
+  className?: string
 }
 
-const getClosestDateIndex = (dates: Date[]) => {
-  const now = new Date()
-  const closestIndex = closestIndexTo(now, dates)
-  if (closestIndex === undefined) throw new Error('No dates passed.')
-  return closestIndex
-}
-
-// const getFormattedDays = (dates: Date[], dateFormat = 'EEE d') => {
-//   const uniqueDays = new Set<string>()
-//   const formattedStartOfDays: string[] = []
-//   dates.forEach((date) => {
-//     const startOfDayDate = startOfDay(date)
-//     const dayKey = startOfDayDate.toISOString()
-//     if (!uniqueDays.has(dayKey)) {
-//       uniqueDays.add(dayKey)
-//       formattedStartOfDays.push(format(startOfDayDate, dateFormat))
-//     }
-//   })
-//   formattedStartOfDays.pop()
-//   return formattedStartOfDays
-// }
-
-// const getFormattedDates = (dates: Date[], dateFormat = 'EEEE do MMMM ha') => {
-//   return dates.map((date) => format(date, dateFormat))
-// }
-
-const THUMB_SIZE = 16
-
-function calcStepMarkOffset(index: number, maxIndex: number) {
-  const percent = convertValueToPercentage(index, 0, maxIndex)
-  const thumbInBoundsOffset = getThumbInBoundsOffset(THUMB_SIZE, percent, 1)
-  return `calc(${percent}% + ${thumbInBoundsOffset}px)`
-}
-
-function convertValueToPercentage(value: number, min: number, max: number) {
-  const maxSteps = max - min
-  const percentPerStep = 100 / maxSteps
-  const percentage = percentPerStep * (value - min)
-  return clamp(percentage, { max: 100, min: 0 })
-}
-
-function getThumbInBoundsOffset(width: number, left: number, direction: number) {
-  const halfWidth = width / 2
-  const halfPercent = 50
-  const offset = linearScale([0, halfPercent], [0, halfWidth])
-  return (halfWidth - offset(left) * direction) * direction
-}
-
-function linearScale(input: readonly [number, number], output: readonly [number, number]) {
-  return (value: number) => {
-    if (input[0] === input[1] || output[0] === output[1]) return output[0]
-    const ratio = (output[1] - output[0]) / (input[1] - input[0])
-    return output[0] + ratio * (value - input[0])
-  }
-}
-
-function clamp(value: number, { min, max }: { min: number; max: number }): number {
-  return Math.min(Math.max(value, min), max)
+const Ticks = ({ divisions, subdivisions, className }: TicksProps) => {
+  const totalTicks = divisions * subdivisions
+  return (
+    <div className={cn('flex h-full w-full items-center', className)}>
+      {Array.from({ length: totalTicks + 1 }, (_, tick) => {
+        const percentage = (tick / totalTicks) * 100
+        const isMajorTick = tick % subdivisions === 0
+        return <div key={tick} style={{ left: `${percentage}%` }} className={`absolute w-px -translate-x-1/2 bg-border ${isMajorTick ? 'h-2/3' : 'h-1/3'}`} />
+      })}
+    </div>
+  )
 }
