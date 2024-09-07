@@ -1,16 +1,16 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import type { Unit, VectorGridId } from '@sctv/shared'
 import { convertUnit, degreesToCompass, vectorGridConfigs } from '@sctv/shared'
-import { Button } from '@sctv/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@sctv/ui/dropdown-menu'
 import { ThemeToggle } from '@sctv/ui/theme'
 
+import type { Vector, VectorGrid } from '~/hooks/useVectorGrid'
 import { Mapbox } from '~/components/mapbox'
 import { useColorRamp } from '~/hooks/useColorRamp'
 import { useVectorGrid } from '~/hooks/useVectorGrid'
+import { LayerSelect } from './layer-select'
 import { Legend } from './legend'
 import { MapboxChoroplethLayer } from './mapbox-choropleth-layer'
 import { MapboxParticleLayer } from './mapbox-particle-layer'
@@ -21,71 +21,87 @@ export const Home = () => {
   const [date, setDate] = useState<Date | null>(null)
   const [cursorLngLat, setCursorLngLat] = useState<[number, number] | null>(null)
   const [vectorGridId, setVectorGridId] = useState<VectorGridId>('wind')
-  const vectorGridConfig = useMemo(() => vectorGridConfigs[vectorGridId], [vectorGridId])
   const { vectorGrid, queryVectorGrid } = useVectorGrid({ vectorGridId, date })
   const [unit, setUnit] = useState<Unit | null>(null)
   useEffect(() => setUnit(vectorGrid?.config.units.base ?? null), [vectorGrid])
 
-  const vectorGridPoint = useMemo(() => queryVectorGrid(cursorLngLat), [cursorLngLat, queryVectorGrid])
+  const vector = useMemo(() => queryVectorGrid(cursorLngLat), [cursorLngLat, queryVectorGrid])
   const { colorRamp } = useColorRamp({ palette: 'turbo' })
 
   const boundaryRef = useRef<HTMLDivElement | null>(null)
+
+  const layerOptions = useMemo(
+    () =>
+      Object.values(vectorGridConfigs).map((config) => ({
+        id: config.id,
+        title: config.title,
+      })),
+    [],
+  )
 
   return (
     <div className="h-full w-full border p-4">
       <div ref={boundaryRef} className="flex h-full w-full flex-col divide-y overflow-hidden border">
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
-          <div className="flex h-full items-center">
-            <div className="flex h-full items-center border-r px-2">SCTV</div>
-          </div>
-          <div className="flex h-full items-center">
-            <div className="border-l">
-              <ThemeToggle />
-            </div>
-          </div>
+          <div className="flex h-full items-center border-r px-2">SCTV</div>
+          <ThemeToggle className="border-l" />
         </div>
         <Mapbox onCursorLngLatChange={setCursorLngLat}>
           <MapboxChoroplethLayer vectorGrid={vectorGrid} />
           <MapboxParticleLayer vectorGrid={vectorGrid} />
         </Mapbox>
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
-          <div className="flex h-full items-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="h-8 border-r px-2 text-xs font-light" variant="ghost">
-                  {vectorGridConfig.title}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent sideOffset={3} alignOffset={2} align="start">
-                <DropdownMenuRadioGroup value={vectorGridId} onValueChange={setVectorGridId as (value: string) => void}>
-                  {Object.values(vectorGridConfigs).map((layer) => (
-                    <DropdownMenuRadioItem key={layer.id} value={layer.id}>
-                      {layer.title}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div className="flex h-full items-center">
-            {vectorGridPoint && vectorGrid && unit && (
-              <div className="flex h-full items-center border-r px-2">
-                {degreesToCompass(vectorGridPoint.direction)}, {convertUnit(vectorGridPoint.magnitude, vectorGrid.config.units.base, unit).toFixed(0)}
-              </div>
-            )}
-            <div className="h-full">
-              {vectorGrid && unit && <UnitSelect value={unit} onChange={(value) => setUnit(value as Unit)} options={[...vectorGrid.config.units.options]} />}
-            </div>
-            <div className="h-full w-[300px]">
-              {vectorGrid && unit && (
-                <Legend colorRamp={colorRamp} min={0} max={convertUnit(vectorGrid.config.magMax, vectorGrid.config.units.base, unit)} steps={6} />
-              )}
-            </div>
-          </div>
+          <Timeline onChange={setDate} interval={3} days={7} />
+        </div>
+        <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
+          <LayerSelect value={vectorGridId} onChange={setVectorGridId as (value: string) => void} options={layerOptions} />
+          {vector && vectorGrid && unit && <VectorInfo vector={vector} vectorGrid={vectorGrid} unit={unit} />}
+          <div className="w-full" />
+          {vectorGrid && unit && (
+            <UnitSelect className="border-l" value={unit} onChange={(value) => setUnit(value as Unit)} options={[...vectorGrid.config.units.options]} />
+          )}
+          {vectorGrid && unit && (
+            <Legend
+              min={0}
+              steps={6}
+              colorRamp={colorRamp}
+              max={convertUnit(vectorGrid.config.magMax, vectorGrid.config.units.base, unit)}
+              className="w-[300px] flex-shrink-0"
+            />
+          )}
         </div>
       </div>
-      <div className="hidden">
-        <Timeline onChange={setDate} interval={3} days={7} />
+    </div>
+  )
+}
+
+interface VectorGridPointProps {
+  vector: Vector
+  vectorGrid: VectorGrid
+  unit: Unit
+}
+
+const VectorInfo: React.FC<VectorGridPointProps> = ({ vector, vectorGrid, unit }) => {
+  const direction = degreesToCompass(vector.direction)
+  const magnitude = convertUnit(vector.magnitude, vectorGrid.config.units.base, unit).toFixed(0)
+
+  const formatValue = (value: string) => {
+    const fillerChar = '-'
+    const fillerCount = 3 - value.length
+    return (
+      <span className="inline-flex justify-end">
+        <span className="opacity-40">{fillerChar.repeat(fillerCount)}</span>
+        <span>{value}</span>
+      </span>
+    )
+  }
+
+  return (
+    <div className="flex h-full flex-shrink-0">
+      <div className="flex h-full items-center border-r px-2">{formatValue(direction)}</div>
+      <div className="flex h-full items-center border-r px-2">
+        {formatValue(magnitude)}
+        {unit}
       </div>
     </div>
   )

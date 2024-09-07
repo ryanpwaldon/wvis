@@ -15,6 +15,11 @@ export interface VectorGrid {
   config: VectorGridConfig
 }
 
+export interface Vector {
+  direction: number
+  magnitude: number
+}
+
 interface UseVectorGridProps {
   vectorGridId: VectorGridId
   date: Date | null
@@ -25,7 +30,7 @@ export const useVectorGrid = ({ vectorGridId, date }: UseVectorGridProps) => {
   const { vectorGrid } = useVectorGridData({ date, config })
 
   const queryVectorGrid = useCallback(
-    (lngLat: [number, number] | null) => {
+    (lngLat: [number, number] | null): Vector | null => {
       if (!lngLat || !vectorGrid) return null
       const adjustedWidth = vectorGrid.image.width - 1 // subtract 1 from width fix (why? needs investigating)
       const adjustedHeight = vectorGrid.image.height - 1 // subtract 1 from width fix (why? needs investigating)

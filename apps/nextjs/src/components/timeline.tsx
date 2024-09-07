@@ -21,13 +21,13 @@ export const Timeline = ({ onChange, days, interval }: TimelineProps) => {
   }, [dates, index, interval, onChange])
 
   return (
-    <div className="relative w-full touch-none select-none rounded-full border bg-background/60 px-6 backdrop-blur-xl active:bg-background/80">
+    <div className="relative flex h-full w-full touch-none select-none items-center rounded-full px-2">
       <Slider.Root
         min={0}
         max={dates.length - 1}
         value={[index]}
         onValueChange={(value) => setIndex(value[0] as unknown as number)}
-        className="relative flex w-full touch-none select-none items-center py-6"
+        className="relative flex h-full w-full touch-none select-none items-center"
       >
         {dates.map((_, i) => {
           if (i % 24 !== 0) return
@@ -39,7 +39,9 @@ export const Timeline = ({ onChange, days, interval }: TimelineProps) => {
             />
           )
         })}
-        <Slider.Thumb className="block h-4 w-4 rounded-full border border-primary/50 bg-background focus-visible:outline-none" />
+        <div className="h-full w-full [&>*]:flex [&>*]:h-full [&>*]:items-center">
+          <Slider.Thumb className="block h-1/2 w-2 border bg-foreground focus-visible:outline-none" />
+        </div>
       </Slider.Root>
     </div>
   )
