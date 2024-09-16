@@ -46,6 +46,7 @@ export const Timeline = ({ days, onChange, boundary, className }: TimelineProps)
                 sideOffset={0}
                 updatePositionStrategy="always"
                 collisionBoundary={boundary.current}
+                collisionPadding={-1}
                 className="border bg-background p-0 text-foreground"
               >
                 <div className="flex divide-x p-0">
