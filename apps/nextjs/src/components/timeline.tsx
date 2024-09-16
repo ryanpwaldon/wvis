@@ -21,7 +21,7 @@ export const Timeline = ({ days, onChange, boundary, className }: TimelineProps)
   const dates = Array(max + 1).fill(null).map((_, i) => addHours(startOfDay(now), i)) // prettier-ignore
   const validDates = dates.map((date) => (new Date(date.toUTCString()).getUTCHours() % UTC_HOUR_INTERVAL === UTC_HOUR_START ? date : null))
   const clamp = (index: number) => closestDateIndex(dates[index], validDates)
-  const [index, setIndex] = useState(closestDateIndex(now, validDates))
+  const [index, setIndex] = useState(closestDateIndex(now, dates))
   useEffect(() => onChange(dates[clamp(index)]!), [])
 
   const handleIndexChange = ([index]: [number]) => {
@@ -85,7 +85,7 @@ const Ticks = ({ divisions, subdivisions, className }: TicksProps) => {
           <div
             key={tick}
             style={{ left: `${percentage}%` }}
-            className={cn('absolute w-px -translate-x-1/2', isMajorTick ? 'h-1/2 bg-foreground/30' : 'h-1/3 bg-foreground/20')}
+            className={cn('absolute w-px -translate-x-1/2', isMajorTick ? 'h-1/2 bg-foreground/60' : 'h-1/3 bg-foreground/20')}
           />
         )
       })}
