@@ -51,7 +51,7 @@ export const Home = () => {
           <MapboxParticleLayer vectorGrid={vectorGrid} />
         </Mapbox>
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
-          <Timeline onChange={setDate} days={5} />
+          <Timeline onChange={setDate} days={5} boundary={boundaryRef} />
         </div>
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
           <LayerSelect value={vectorGridId} onChange={setVectorGridId as (value: string) => void} options={layerOptions} />

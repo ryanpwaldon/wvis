@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { RefObject, useState } from 'react'
 import * as Slider from '@radix-ui/react-slider'
 import { addHours, closestIndexTo, format, startOfDay } from 'date-fns'
 
@@ -11,10 +11,11 @@ const UTC_HOUR_INTERVAL = 3
 interface TimelineProps {
   days: number
   onChange: (value: Date) => void
+  boundary: RefObject<HTMLDivElement>
   className?: string
 }
 
-export const Timeline = ({ days, onChange, className }: TimelineProps) => {
+export const Timeline = ({ days, onChange, boundary, className }: TimelineProps) => {
   const now = new Date()
   const max = days * 24
   const dates = Array(max + 1).fill(null).map((_, i) => addHours(startOfDay(now), i)) // prettier-ignore
@@ -39,7 +40,13 @@ export const Timeline = ({ days, onChange, className }: TimelineProps) => {
                   <div className="h-2/3 w-1 rounded-full bg-yellow-400" />
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="border p-0" sideOffset={0} align="center">
+              <TooltipContent
+                align="center"
+                sideOffset={0}
+                updatePositionStrategy="always"
+                collisionBoundary={boundary.current}
+                className="border bg-background p-0 text-foreground"
+              >
                 <div className="flex divide-x p-0">
                   <div className="px-2 py-1.5">{format(dates[index]!, 'EEE d')}</div>
                   <div className="px-2 py-1.5">{format(dates[index]!, 'ha')}</div>
@@ -73,7 +80,13 @@ const Ticks = ({ divisions, subdivisions, className }: TicksProps) => {
       {Array.from({ length: totalTicks + 1 }, (_, tick) => {
         const percentage = (tick / totalTicks) * 100
         const isMajorTick = tick % subdivisions === 0
-        return <div key={tick} style={{ left: `${percentage}%` }} className={`absolute w-px -translate-x-1/2 bg-border ${isMajorTick ? 'h-2/3' : 'h-1/3'}`} />
+        return (
+          <div
+            key={tick}
+            style={{ left: `${percentage}%` }}
+            className={cn('absolute w-px -translate-x-1/2', isMajorTick ? 'h-1/2 bg-foreground/30' : 'h-1/3 bg-foreground/20')}
+          />
+        )
       })}
     </div>
   )
