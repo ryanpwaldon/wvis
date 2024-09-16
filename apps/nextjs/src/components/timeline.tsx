@@ -1,4 +1,4 @@
-import React, { RefObject, useState } from 'react'
+import React, { RefObject, useEffect, useState } from 'react'
 import * as Slider from '@radix-ui/react-slider'
 import { addHours, closestIndexTo, format, startOfDay } from 'date-fns'
 
@@ -22,10 +22,11 @@ export const Timeline = ({ days, onChange, boundary, className }: TimelineProps)
   const validDates = dates.map((date) => (new Date(date.toUTCString()).getUTCHours() % UTC_HOUR_INTERVAL === UTC_HOUR_START ? date : null))
   const clamp = (index: number) => closestDateIndex(dates[index], validDates)
   const [index, setIndex] = useState(closestDateIndex(now, validDates))
+  useEffect(() => onChange(dates[clamp(index)]!), [])
+
   const handleIndexChange = ([index]: [number]) => {
     setIndex(index)
     onChange(dates[clamp(index)]!)
-    console.log(dates[clamp(index)]!)
   }
 
   return (
