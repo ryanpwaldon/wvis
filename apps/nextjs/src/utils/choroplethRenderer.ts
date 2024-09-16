@@ -132,7 +132,7 @@ export const fs = /* glsl */ `
     vec2 velocity = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, getVelocityBicubic(vector_grid_pos));
     float magnitude = length(velocity) / u_color_ramp_max_mag;
     vec4 color = texture2D(u_color_ramp, vec2(magnitude, 0.5));
-    gl_FragColor = vec4(color.rgb, 0.5);
+    gl_FragColor = vec4(color.rgb, 0.7);
   }
 `
 
@@ -199,7 +199,7 @@ export class ChoroplethRenderer {
     this.gl.enable(this.gl.BLEND)
     this.gl.disable(this.gl.DEPTH_TEST)
     this.gl.disable(this.gl.STENCIL_TEST)
-    this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA)
+    this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE)
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height)
     this.gl.useProgram(this.choroplethDrawProgram.program)
     const choroplethQuadBufferInfo = createBufferInfoFromArrays(this.gl, { a_pos: { numComponents: 2, data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]) } }) // prettier-ignore
