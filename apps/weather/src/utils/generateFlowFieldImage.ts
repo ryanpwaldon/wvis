@@ -16,8 +16,15 @@ interface GenerateFlowFieldImageProps {
 export const generateFlowFieldImage = async ({ u, v, minU, maxU, minV, maxV, width, height }: GenerateFlowFieldImageProps): Promise<Buffer> => {
   if (u.length !== width * height || v.length !== width * height) throw new Error("Array size doesn't match the provided dimensions.")
   const imageData = new Uint8Array(width * height * 4)
-  const scaleU = scaleLinear().domain([minU, maxU]).range([0, 255]).interpolate(interpolateRound)
-  const scaleV = scaleLinear().domain([minV, maxV]).range([0, 255]).interpolate(interpolateRound)
+
+  // Adjust minU and minV to ensure zero maps to an integer in the range.
+  const kU = Math.ceil(((0 - minU) / (maxU - minU)) * 255)
+  const kV = Math.ceil(((0 - minV) / (maxV - minV)) * 255)
+  const adjustedMinU = -((kU * maxU) / (255 - kU))
+  const adjustedMinV = -((kV * maxV) / (255 - kV))
+
+  const scaleU = scaleLinear().domain([adjustedMinU, maxU]).range([0, 255]).interpolate(interpolateRound)
+  const scaleV = scaleLinear().domain([adjustedMinV, maxV]).range([0, 255]).interpolate(interpolateRound)
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const invertedY = height - y - 1 // invert y-axis
@@ -41,9 +48,9 @@ export const generateFlowFieldImage = async ({ u, v, minU, maxU, minV, maxV, wid
       bitDepth: 8,
       strictMode: true,
       ancillaryChunks: [
-        { type: 'tEXt', keyword: 'minU', text: minU.toString() },
+        { type: 'tEXt', keyword: 'minU', text: adjustedMinU.toString() },
         { type: 'tEXt', keyword: 'maxU', text: maxU.toString() },
-        { type: 'tEXt', keyword: 'minV', text: minV.toString() },
+        { type: 'tEXt', keyword: 'minV', text: adjustedMinV.toString() },
         { type: 'tEXt', keyword: 'maxV', text: maxV.toString() },
       ],
     },
