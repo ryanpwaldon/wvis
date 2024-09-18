@@ -57,6 +57,7 @@ export const Timeline = ({ days, onChange, boundary, className }: TimelineProps)
             </Tooltip>
           </Slider.Range>
         </Slider.Track>
+        <Slider.SliderThumb />
       </Slider.Root>
     </div>
   )
