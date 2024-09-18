@@ -1,5 +1,10 @@
 import { CLOUDFLARE_BUCKET_URL } from '../constants'
 
+export enum ChoroplethCombinationMode {
+  Cancellation,
+  Preservation,
+}
+
 export const vectorGridConfigs = {
   wind: {
     id: 'wind',
@@ -17,6 +22,9 @@ export const vectorGridConfigs = {
         { display: 'KTS', value: 'kts' },
       ],
     },
+    choropleth: {
+      combinationMode: ChoroplethCombinationMode.Cancellation,
+    },
   },
   waves: {
     id: 'waves',
@@ -31,6 +39,9 @@ export const vectorGridConfigs = {
         { display: 'M', value: 'm' },
         { display: 'FT', value: 'ft' },
       ],
+    },
+    choropleth: {
+      combinationMode: ChoroplethCombinationMode.Preservation,
     },
   },
 } as const

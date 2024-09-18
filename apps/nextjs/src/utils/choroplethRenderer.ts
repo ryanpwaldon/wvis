@@ -5,6 +5,8 @@ import { interpolateTurbo } from 'd3-scale-chromatic'
 import { MercatorCoordinate } from 'mapbox-gl'
 import { createBufferInfoFromArrays, createProgramInfo, createTexture, drawBufferInfo, setBuffersAndAttributes, setUniforms } from 'twgl.js'
 
+import { ChoroplethCombinationMode } from '@sctv/shared'
+
 import type { VectorGrid } from '~/hooks/useVectorGrid'
 
 export const vs = /* glsl */ `
@@ -25,54 +27,9 @@ export const fs = /* glsl */ `
   uniform vec2 u_vector_grid_res;
   uniform vec2 u_vector_grid_min_mag;
   uniform vec2 u_vector_grid_max_mag;
+  uniform int u_vector_grid_combination_mode;
   uniform vec4 u_map_mercator_bounds;
   varying vec2 v_tex_pos;
-
-  vec2 getVelocityBilinear(const vec2 uv) {
-    vec2 px = 1.0 / u_vector_grid_res;
-    vec2 vc = (floor(uv * u_vector_grid_res)) * px;
-    vec2 f = fract(uv * u_vector_grid_res);
-    vec2 tl = texture2D(u_vector_grid, vc).rg;
-    vec2 tr = texture2D(u_vector_grid, vc + vec2(px.x, 0)).rg;
-    vec2 bl = texture2D(u_vector_grid, vc + vec2(0, px.y)).rg;
-    vec2 br = texture2D(u_vector_grid, vc + px).rg;
-    return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
-  }
-
-  vec2 catmullRom(vec2 p0, vec2 p1, vec2 p2, vec2 p3, float t) {
-    float t2 = t * t;
-    float t3 = t2 * t;    
-    vec2 v0 = (p2 - p0) * 0.5;
-    vec2 v1 = (p3 - p1) * 0.5;
-    return (2.0 * p1 - 2.0 * p2 + v0 + v1) * t3 + (-3.0 * p1 + 3.0 * p2 - 2.0 * v0 - v1) * t2 + v0 * t + p1;
-  }
-
-  vec2 getVelocityCatmullRom(vec2 uv) {
-    vec2 px = 1.0 / u_vector_grid_res;
-    vec2 vc = floor(uv * u_vector_grid_res) * px;
-    vec2 f = fract(uv * u_vector_grid_res);
-    vec2 p00 = texture2D(u_vector_grid, vc + vec2(-px.x, -px.y)).rg;
-    vec2 p10 = texture2D(u_vector_grid, vc + vec2(0.0, -px.y)).rg;
-    vec2 p20 = texture2D(u_vector_grid, vc + vec2(px.x, -px.y)).rg;
-    vec2 p30 = texture2D(u_vector_grid, vc + vec2(2.0 * px.x, -px.y)).rg;
-    vec2 p01 = texture2D(u_vector_grid, vc + vec2(-px.x, 0.0)).rg;
-    vec2 p11 = texture2D(u_vector_grid, vc).rg;
-    vec2 p21 = texture2D(u_vector_grid, vc + vec2(px.x, 0.0)).rg;
-    vec2 p31 = texture2D(u_vector_grid, vc + vec2(2.0 * px.x, 0.0)).rg;
-    vec2 p02 = texture2D(u_vector_grid, vc + vec2(-px.x, px.y)).rg;
-    vec2 p12 = texture2D(u_vector_grid, vc + vec2(0.0, px.y)).rg;
-    vec2 p22 = texture2D(u_vector_grid, vc + vec2(px.x, px.y)).rg;
-    vec2 p32 = texture2D(u_vector_grid, vc + vec2(2.0 * px.x, px.y)).rg;
-    vec2 p03 = texture2D(u_vector_grid, vc + vec2(-px.x, 2.0 * px.y)).rg;
-    vec2 p13 = texture2D(u_vector_grid, vc + vec2(0.0, 2.0 * px.y)).rg;
-    vec2 p23 = texture2D(u_vector_grid, vc + vec2(px.x, 2.0 * px.y)).rg;
-    vec2 p33 = texture2D(u_vector_grid, vc + vec2(2.0 * px.x, 2.0 * px.y)).rg;
-    vec2 x0 = catmullRom(p00, p10, p20, p30, f.x);
-    vec2 x1 = catmullRom(p01, p11, p21, p31, f.x);
-    vec2 x2 = catmullRom(p02, p12, p22, p32, f.x);
-    vec2 x3 = catmullRom(p03, p13, p23, p33, f.x);
-    return catmullRom(x0, x1, x2, x3, f.y);
-  }
 
   vec4 cubic(float v) {
     vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
@@ -84,7 +41,7 @@ export const fs = /* glsl */ `
     return vec4(x, y, z, w) * (1.0/6.0);
   }
 
-  vec2 getVelocityBicubic(vec2 uv) {
+  float getMagnitudeBicubicCancellation(vec2 uv) {
     vec2 px = 1.0 / u_vector_grid_res;
     vec2 vc = floor(uv * u_vector_grid_res) * px;
     vec2 f = fract(uv * u_vector_grid_res);
@@ -110,7 +67,54 @@ export const fs = /* glsl */ `
     vec2 row1 = c01 * x.x + c11 * x.y + c21 * x.z + c31 * x.w;
     vec2 row2 = c02 * x.x + c12 * x.y + c22 * x.z + c32 * x.w;
     vec2 row3 = c03 * x.x + c13 * x.y + c23 * x.z + c33 * x.w;
-    return row0 * y.x + row1 * y.y + row2 * y.z + row3 * y.w;
+    vec2 velocity = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, row0 * y.x + row1 * y.y + row2 * y.z + row3 * y.w);
+    return length(velocity) / u_color_ramp_max_mag;
+  }
+
+  float getMagnitudeBicubicPreservation(vec2 uv) {
+    vec2 px = 1.0 / u_vector_grid_res;
+    vec2 vc = floor(uv * u_vector_grid_res) * px;
+    vec2 f = fract(uv * u_vector_grid_res);
+    vec4 x = cubic(f.x);
+    vec4 y = cubic(f.y);
+    vec2 c00 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(-px.x, -px.y)).rg);
+    vec2 c10 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(0.0, -px.y)).rg);
+    vec2 c20 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(px.x, -px.y)).rg);
+    vec2 c30 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(2.0 * px.x, -px.y)).rg);
+    vec2 c01 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(-px.x, 0.0)).rg);
+    vec2 c11 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(0.0, 0.0)).rg);
+    vec2 c21 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(px.x, 0.0)).rg);
+    vec2 c31 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(2.0 * px.x, 0.0)).rg);
+    vec2 c02 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(-px.x, px.y)).rg);
+    vec2 c12 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(0.0, px.y)).rg);
+    vec2 c22 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(px.x, px.y)).rg);
+    vec2 c32 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(2.0 * px.x, px.y)).rg);
+    vec2 c03 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(-px.x, 2.0 * px.y)).rg);
+    vec2 c13 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(0.0, 2.0 * px.y)).rg);
+    vec2 c23 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(px.x, 2.0 * px.y)).rg);
+    vec2 c33 = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, texture2D(u_vector_grid, vc + vec2(2.0 * px.x, 2.0 * px.y)).rg);
+    float m00 = length(c00);
+    float m10 = length(c10);
+    float m20 = length(c20);
+    float m30 = length(c30);
+    float m01 = length(c01);
+    float m11 = length(c11);
+    float m21 = length(c21);
+    float m31 = length(c31);
+    float m02 = length(c02);
+    float m12 = length(c12);
+    float m22 = length(c22);
+    float m32 = length(c32);
+    float m03 = length(c03);
+    float m13 = length(c13);
+    float m23 = length(c23);
+    float m33 = length(c33);
+    float row0 = m00 * x.x + m10 * x.y + m20 * x.z + m30 * x.w;
+    float row1 = m01 * x.x + m11 * x.y + m21 * x.z + m31 * x.w;
+    float row2 = m02 * x.x + m12 * x.y + m22 * x.z + m32 * x.w;
+    float row3 = m03 * x.x + m13 * x.y + m23 * x.z + m33 * x.w;
+    float magnitude = row0 * y.x + row1 * y.y + row2 * y.z + row3 * y.w;
+    return magnitude / u_color_ramp_max_mag;
   }
 
   vec2 getLngLat(float x_domain, float y_domain, vec2 pos) {
@@ -129,8 +133,12 @@ export const fs = /* glsl */ `
     float lng = lngLat.x;
     float lat = lngLat.y;
     vec2 vector_grid_pos = vec2(lng / 360.0, (lat + 90.0) / 180.0);
-    vec2 velocity = mix(u_vector_grid_min_mag, u_vector_grid_max_mag, getVelocityBicubic(vector_grid_pos));
-    float magnitude = length(velocity) / u_color_ramp_max_mag;
+    float magnitude;
+    if (u_vector_grid_combination_mode == ${ChoroplethCombinationMode.Cancellation}) {
+      magnitude = getMagnitudeBicubicCancellation(vector_grid_pos);
+    } else if (u_vector_grid_combination_mode == ${ChoroplethCombinationMode.Preservation}) {
+      magnitude = getMagnitudeBicubicPreservation(vector_grid_pos);
+    }
     vec4 color = texture2D(u_color_ramp, vec2(magnitude, 0.5));
     gl_FragColor = vec4(color.rgb, 0.7);
   }
@@ -207,6 +215,7 @@ export class ChoroplethRenderer {
     setUniforms(this.choroplethDrawProgram, {
       u_color_ramp: this.colorRampTexture,
       u_vector_grid: this.vectorGridTexture,
+      u_vector_grid_combination_mode: this.vectorGrid.config.choropleth.combinationMode,
       u_vector_grid_res: [this.vectorGrid.image.width - 1, this.vectorGrid.image.height - 1], // subtract 1 from height/width fix (why? needs investigating)
       u_vector_grid_min_mag: [this.vectorGrid.metadata.minU, this.vectorGrid.metadata.minV],
       u_vector_grid_max_mag: [this.vectorGrid.metadata.maxU, this.vectorGrid.metadata.maxV],
