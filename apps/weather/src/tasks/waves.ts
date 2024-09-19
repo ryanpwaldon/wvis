@@ -64,17 +64,17 @@ export const run = async () => {
     let maxU = -Infinity
     let minV = Infinity
     let maxV = -Infinity
-    const wavesU: number[] = []
-    const wavesV: number[] = []
+    const wavesU: Array<number | null> = []
+    const wavesV: Array<number | null> = []
     wavesDirectionHeightTuples.forEach(([direction, height]) => {
       const u = componentsToU(direction, height)
       const v = componentsToV(direction, height)
       wavesU.push(u)
       wavesV.push(v)
-      if (u < minU) minU = u
-      if (u > maxU) maxU = u
-      if (v < minV) minV = v
-      if (v > maxV) maxV = v
+      if (u !== null && u < minU) minU = u
+      if (u !== null && u > maxU) maxU = u
+      if (v !== null && v < minV) minV = v
+      if (v !== null && v > maxV) maxV = v
     })
     console.log(`Computed U and V components time index ${timeIndex}`)
     const buffer = await generateFlowFieldImage({

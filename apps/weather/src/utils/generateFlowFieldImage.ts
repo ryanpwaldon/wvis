@@ -3,8 +3,8 @@ import { interpolateRound } from 'd3-interpolate'
 import { scaleLinear } from 'd3-scale'
 
 interface GenerateFlowFieldImageProps {
-  u: number[]
-  v: number[]
+  u: Array<number | null>
+  v: Array<number | null>
   minU: number
   maxU: number
   minV: number
@@ -32,13 +32,12 @@ export const generateFlowFieldImage = async ({ u, v, minU, maxU, minV, maxV, wid
       const uVal = u[index]
       const vVal = v[index]
       if (uVal === undefined || vVal === undefined) throw new Error(`Undefined value encountered at index ${index}`)
-      const red = scaleU(uVal)
-      const green = scaleV(vVal)
+      const isMissingValue = uVal === null || vVal === null
       const pixelIndex = (invertedY * width + x) * 4
-      imageData[pixelIndex] = red
-      imageData[pixelIndex + 1] = green
+      imageData[pixelIndex] = scaleU(isMissingValue ? 0 : uVal)
+      imageData[pixelIndex + 1] = scaleV(isMissingValue ? 0 : vVal)
       imageData[pixelIndex + 2] = 0
-      imageData[pixelIndex + 3] = 255
+      imageData[pixelIndex + 3] = isMissingValue ? 0 : 255
     }
   }
   const encoded = await encodePng(

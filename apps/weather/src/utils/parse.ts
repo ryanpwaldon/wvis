@@ -5,7 +5,7 @@ export const parse = (text: string, variable: string) => {
   let isCapturing = false
   let min = Infinity
   let max = -Infinity
-  const values = lines.reduce((values: number[], line) => {
+  const values = lines.reduce((values: Array<number | null>, line) => {
     if (line.startsWith(variable)) {
       isCapturing = true
       return values
@@ -20,7 +20,7 @@ export const parse = (text: string, variable: string) => {
         .slice(1)
         .map((v) => {
           const trimmed = v.trim()
-          if (trimmed === MISSING_VALUE) return 0
+          if (trimmed === MISSING_VALUE) return null
           const num = parseFloat(trimmed)
           if (num < min) min = num
           if (num > max) max = num
