@@ -186,11 +186,8 @@ export class ChoroplethRenderer {
     const { width, height, data } = vectorGrid.image
     const { width: currWidth, height: currHeight } = this.vectorGrid?.image ?? { width: null, height: null }
     this.gl.bindTexture(this.gl.TEXTURE_2D, this.vectorGridTexture)
-    if (currWidth === width && currHeight === height) {
-      this.gl.texSubImage2D(this.gl.TEXTURE_2D, 0, 0, 0, width, height, this.gl.RGBA, this.gl.UNSIGNED_BYTE, data)
-    } else {
-      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, width, height, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, data)
-    }
+    if (currWidth === width && currHeight === height) this.gl.texSubImage2D(this.gl.TEXTURE_2D, 0, 0, 0, width, height, this.gl.RGBA, this.gl.UNSIGNED_BYTE, data) // prettier-ignore
+    else this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, width, height, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, data) // prettier-ignore
     this.vectorGrid = vectorGrid
   }
 
