@@ -4,6 +4,7 @@ import { MercatorCoordinate } from 'mapbox-gl'
 import { createBufferInfoFromArrays, createProgramInfo, createTextures, drawBufferInfo, setBuffersAndAttributes, setUniforms } from 'twgl.js'
 
 import type { VectorGrid } from '~/hooks/useVectorGrid'
+import { ParticleSpeedCurve } from '@acme/shared'
 
 // Returns all pixels
 export const vQuad = /* glsl */ `
@@ -72,6 +73,7 @@ export const fParticlesUpdate = /* glsl */ `
   uniform float u_drop_rate;
   uniform float u_drop_rate_bump;
   uniform float u_random_seed;
+  uniform int u_speed_curve; // 0 = linear, 1 = sqrt
   varying vec2 v_tex_pos;
 
   float rand(const vec2 co) {
@@ -191,9 +193,13 @@ export const fParticlesUpdate = /* glsl */ `
     // normalise velocity between -100 and 100 (e.g. [-91, 34])
     vec2 velocity = mix(u_vector_grid_min_speed, u_vector_grid_max_speed, getVelocityBicubic(vector_grid_pos));
     // get speed by dividing vector length, by max speed length
-    float speed_t = length(velocity) / length(u_vector_grid_max_speed);
+    float mag = length(velocity);
+    float maxMag = length(u_vector_grid_max_speed);
+    float speed_t = mag / maxMag;
+    // apply speed curve: sqrt compresses range (light moves faster, heavy doesn't go crazy)
+    float speedMultiplier = u_speed_curve == 1 && speed_t > 0.0 ? sqrt(speed_t) / speed_t : 1.0;
     // get offset (distance to move particle). we must flip y to account for differing coordinate systems
-    vec2 offset = vec2(velocity.x, -velocity.y) * 0.0001 * u_speed_factor;
+    vec2 offset = vec2(velocity.x, -velocity.y) * speedMultiplier * 0.0001 * u_speed_factor;
     // update pos with offset
     pos = fract(1.0 + pos + offset);
     vec2 seed = (pos + v_tex_pos) * u_random_seed;
@@ -397,6 +403,7 @@ class ParticleRenderer {
       u_random_seed: Math.random(),
       u_vector_grid_res: [this.vectorFieldData.image.width - 1, this.vectorFieldData.image.height - 1], // subtract 1 from height/width fix (why? needs investigating)
       u_speed_factor: this.PARTICLE_SPEED_FACTOR,
+      u_speed_curve: this.vectorFieldData.config.particleSpeedCurve === ParticleSpeedCurve.Sqrt ? 1 : 0,
       u_drop_rate: this.PARTICLE_DROP_RATE,
       u_drop_rate_bump: this.PARTICLE_DROP_RATE_INCREASE,
       u_map_mercator_bounds: this.mapViewportBounds,

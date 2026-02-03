@@ -5,6 +5,11 @@ export enum HeatmapCombinationMode {
   Preservation,
 }
 
+export enum ParticleSpeedCurve {
+  Linear,
+  Sqrt,
+}
+
 export const vectorGridConfigs = {
   wind: {
     id: 'wind',
@@ -25,6 +30,7 @@ export const vectorGridConfigs = {
     heatmap: {
       combinationMode: HeatmapCombinationMode.Cancellation,
     },
+    particleSpeedCurve: ParticleSpeedCurve.Linear,
   },
   waves: {
     id: 'waves',
@@ -43,6 +49,7 @@ export const vectorGridConfigs = {
     heatmap: {
       combinationMode: HeatmapCombinationMode.Preservation,
     },
+    particleSpeedCurve: ParticleSpeedCurve.Sqrt,
   },
 } as const
 
