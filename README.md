@@ -1,5 +1,12 @@
 # WVIS
 
-A weather visualization project for exploring wind and wave forecasts on an interactive map. Rendered with WebGL using bicubic interpolation for smooth heatmaps and animated particles for directional flow.
+A weather visualization project.
 
-The weather app (`apps/weather`) fetches NOAA GFS forecast data, processes it into vector grid PNGs, and uploads to Cloudflare R2. The Next.js app (`apps/nextjs`) renders this data using custom WebGL shaders.
+The weather app (`apps/weather`) fetches NOAA GFS forecast data and generates vector field PNGs for wind and swell patterns. One PNG per 3-hour interval across a multi-day forecast period, each representing global conditions at a single point in time. These are uploaded to Cloudflare R2, where the Next.js app (`apps/nextjs`) retrieves and renders them using particle animations and interpolated heat maps with custom WebGL shaders.
+
+## Commands
+
+```bash
+pnpm dev           # Start dev servers
+pnpm weather:sync  # Sync weather data to R2
+```
