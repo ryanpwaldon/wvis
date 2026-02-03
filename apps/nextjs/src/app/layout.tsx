@@ -21,17 +21,14 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
-  ],
+  themeColor: 'black',
 }
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html className="h-full w-full" lang="en" suppressHydrationWarning>
       <body className={cn('fixed left-0 top-0 h-full w-full bg-background font-mono text-xs font-light text-foreground antialiased', fontMono.variable)}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" forcedTheme="dark">
           <TooltipProvider>{props.children}</TooltipProvider>
         </ThemeProvider>
       </body>
