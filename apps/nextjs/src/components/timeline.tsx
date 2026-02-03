@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@acme/ui/tooltip'
 import { env } from '~/env'
 
 const UTC_HOUR_START = 0 // 12am UTC
-const UTC_HOUR_INTERVAL = 3
+export const UTC_HOUR_INTERVAL = 3
 
 const getReferenceDate = () => env.NEXT_PUBLIC_REFERENCE_DATE ?? new Date()
 

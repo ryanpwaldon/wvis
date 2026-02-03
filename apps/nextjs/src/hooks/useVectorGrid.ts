@@ -1,12 +1,14 @@
 import type { VectorGridConfig, VectorGridId } from '@acme/shared'
 import type { z } from 'zod'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
+import { addHours } from 'date-fns'
 import { scaleLngLat, vectorGridConfigs } from '@acme/shared'
 import { scaleLinear } from 'd3-scale'
 
 import type { vectorGridMetadataSchema } from './useVectorGridData'
+import { UTC_HOUR_INTERVAL } from '~/components/timeline'
 import { getPointFromImageData } from '~/utils/getPointFromImageData'
-import { useVectorGridData } from './useVectorGridData'
+import { preloadVectorGrid, useVectorGridData } from './useVectorGridData'
 
 export interface VectorGrid {
   image: ImageData
@@ -26,7 +28,32 @@ interface UseVectorGridProps {
 
 export const useVectorGrid = ({ vectorGridId, date }: UseVectorGridProps) => {
   const config = useMemo(() => vectorGridConfigs[vectorGridId], [vectorGridId])
-  const { vectorGrid } = useVectorGridData({ date, config })
+  const { vectorGrid, isLoading } = useVectorGridData({ date, config })
+
+  useEffect(() => {
+    if (isLoading || !date || !vectorGrid) return
+
+    let cancelled = false
+    const preload = async () => {
+      const PRELOAD_COUNT = 6
+
+      const dates: Date[] = []
+      for (let i = 1; i <= PRELOAD_COUNT; i++) {
+        dates.push(addHours(date, i * UTC_HOUR_INTERVAL))
+        dates.push(addHours(date, -i * UTC_HOUR_INTERVAL))
+      }
+
+      for (const d of dates) {
+        if (cancelled) return
+        await preloadVectorGrid(d, vectorGrid.config)
+      }
+    }
+
+    void preload()
+    return () => {
+      cancelled = true
+    }
+  }, [isLoading, date, vectorGrid])
 
   const queryVectorGrid = useCallback(
     (lngLat: [number, number] | null): Vector | null => {

@@ -1,9 +1,10 @@
-import type { VectorGridConfig } from '@acme/shared'
 import type { IPngMetadataTextualData } from '@lunapaint/png-codec'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { decodePng } from '@lunapaint/png-codec'
 import ky from 'ky'
 import { z } from 'zod'
+
+import type { VectorGridConfig } from '@acme/shared'
 
 import type { VectorGrid } from './useVectorGrid'
 
@@ -21,6 +22,22 @@ interface UseVectorGridDataProps {
 
 // Create a cache to store processed image data
 const cache = new Map<string, VectorGrid>()
+
+export async function preloadVectorGrid(date: Date, config: VectorGridConfig): Promise<void> {
+  const url = config.url(date)
+  if (cache.has(url)) return
+  try {
+    const arrayBuffer = await ky(url, { mode: 'cors' }).arrayBuffer()
+    const decoded = await decodePng(new Uint8Array(arrayBuffer), { parseChunkTypes: '*', strictMode: true })
+    const decodedImage = new ImageData(new Uint8ClampedArray(decoded.image.data.buffer), decoded.image.width, decoded.image.height)
+    const decodedMetadata = vectorGridMetadataSchema.parse(
+      Object.fromEntries(decoded.metadata.filter((item): item is IPngMetadataTextualData => item.type === 'tEXt').map((item) => [item.keyword, item.text])),
+    )
+    cache.set(url, { image: decodedImage, metadata: decodedMetadata, config })
+  } catch {
+    // Silently skip failed preloads
+  }
+}
 
 export const useVectorGridData = ({ date, config }: UseVectorGridDataProps) => {
   const [vectorGrid, setVectorGrid] = useState<VectorGrid | null>(null)
