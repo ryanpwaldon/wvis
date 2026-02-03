@@ -1,9 +1,10 @@
 import type { RefObject } from 'react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { cn } from '@acme/ui'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@acme/ui/tooltip'
 import * as Slider from '@radix-ui/react-slider'
 import { addHours, closestIndexTo, format, startOfDay } from 'date-fns'
+
+import { cn } from '@acme/ui'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@acme/ui/tooltip'
 
 import { env } from '~/env'
 
@@ -79,7 +80,7 @@ export const Timeline = ({ days, onChange, boundary, className }: TimelineProps)
                 className="border bg-background p-0 text-foreground"
               >
                 <div className="flex divide-x p-0">
-                  {dates[index] && <div className="px-2 py-1.5">{format(dates[index], 'EEE d')}</div>}
+                  {dates[index] && <div className="px-2 py-1.5">{format(dates[index], 'd/M/yyyy')}</div>}
                   {dates[index] && <div className="px-2 py-1.5">{format(dates[index], 'ha')}</div>}
                 </div>
               </TooltipContent>
