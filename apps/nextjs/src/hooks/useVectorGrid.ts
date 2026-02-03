@@ -1,9 +1,8 @@
+import type { VectorGridConfig, VectorGridId } from '@acme/shared'
 import type { z } from 'zod'
 import { useCallback, useMemo } from 'react'
+import { scaleLngLat, vectorGridConfigs } from '@acme/shared'
 import { scaleLinear } from 'd3-scale'
-
-import type { VectorGridConfig, VectorGridId } from '@sctv/shared'
-import { scaleLngLat, vectorGridConfigs } from '@sctv/shared'
 
 import type { vectorGridMetadataSchema } from './useVectorGridData'
 import { getPointFromImageData } from '~/utils/getPointFromImageData'

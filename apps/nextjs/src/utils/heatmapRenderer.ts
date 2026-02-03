@@ -1,11 +1,10 @@
 import type { Map } from 'mapbox-gl'
 import type { ProgramInfo } from 'twgl.js'
+import { HeatmapCombinationMode } from '@acme/shared'
 import { rgb } from 'd3-color'
 import { interpolateTurbo } from 'd3-scale-chromatic'
 import { MercatorCoordinate } from 'mapbox-gl'
 import { createBufferInfoFromArrays, createProgramInfo, createTexture, drawBufferInfo, setBuffersAndAttributes, setUniforms } from 'twgl.js'
-
-import { HeatmapCombinationMode } from '@sctv/shared'
 
 import type { VectorGrid } from '~/hooks/useVectorGrid'
 

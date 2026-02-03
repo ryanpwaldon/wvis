@@ -1,5 +1,5 @@
 {
-  "name": "@sctv/ui",
+  "name": "@acme/ui",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -39,10 +39,10 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@sctv/eslint-config": "workspace:*",
-    "@sctv/prettier-config": "workspace:*",
-    "@sctv/tailwind-config": "workspace:*",
-    "@sctv/tsconfig": "workspace:*",
+    "@acme/eslint-config": "workspace:*",
+    "@acme/prettier-config": "workspace:*",
+    "@acme/tailwind-config": "workspace:*",
+    "@acme/tsconfig": "workspace:*",
     "@types/react": "catalog:react18",
     "eslint": "catalog:",
     "prettier": "catalog:",
@@ -55,5 +55,5 @@
     "react": "catalog:react18",
     "zod": "catalog:"
   },
-  "prettier": "@sctv/prettier-config"
+  "prettier": "@acme/prettier-config"
 }

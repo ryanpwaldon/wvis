@@ -1,5 +1,5 @@
 {
-  "name": "@sctv/weather",
+  "name": "@acme/weather",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -13,9 +13,9 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
+    "@acme/shared": "workspace:*",
     "@aws-sdk/client-s3": "^3.635.0",
     "@lunapaint/png-codec": "catalog:",
-    "@sctv/shared": "workspace:*",
     "@t3-oss/env-core": "^0.10.1",
     "d3-interpolate": "catalog:",
     "d3-scale": "catalog:",
@@ -25,9 +25,9 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@sctv/eslint-config": "workspace:*",
-    "@sctv/prettier-config": "workspace:*",
-    "@sctv/tsconfig": "workspace:*",
+    "@acme/eslint-config": "workspace:*",
+    "@acme/prettier-config": "workspace:*",
+    "@acme/tsconfig": "workspace:*",
     "@types/d3-interpolate": "catalog:",
     "@types/d3-scale": "catalog:",
     "dotenv-cli": "^7.4.2",
@@ -35,5 +35,5 @@
     "prettier": "catalog:",
     "typescript": "catalog:"
   },
-  "prettier": "@sctv/prettier-config"
+  "prettier": "@acme/prettier-config"
 }

@@ -1,10 +1,9 @@
+import type { VectorGridConfig } from '@acme/shared'
 import type { IPngMetadataTextualData } from '@lunapaint/png-codec'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { decodePng } from '@lunapaint/png-codec'
 import ky from 'ky'
 import { z } from 'zod'
-
-import type { VectorGridConfig } from '@sctv/shared'
 
 import type { VectorGrid } from './useVectorGrid'
 

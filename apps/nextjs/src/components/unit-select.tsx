@@ -1,6 +1,6 @@
-import { cn } from '@sctv/ui'
-import { Button } from '@sctv/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@sctv/ui/dropdown-menu'
+import { cn } from '@acme/ui'
+import { Button } from '@acme/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@acme/ui/dropdown-menu'
 
 export interface Option {
   display: string

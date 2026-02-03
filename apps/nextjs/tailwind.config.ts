@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss'
-import baseConfig from '@sctv/tailwind-config/web'
+import baseConfig from '@acme/tailwind-config/web'
 import { fontFamily } from 'tailwindcss/defaultTheme'
 
 export default {

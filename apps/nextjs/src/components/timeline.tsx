@@ -1,10 +1,9 @@
-import type { RefObject} from 'react';
+import type { RefObject } from 'react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { cn } from '@acme/ui'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@acme/ui/tooltip'
 import * as Slider from '@radix-ui/react-slider'
 import { addHours, closestIndexTo, format, startOfDay } from 'date-fns'
-
-import { cn } from '@sctv/ui'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@sctv/ui/tooltip'
 
 const UTC_HOUR_START = 0 // 12am UTC
 const UTC_HOUR_INTERVAL = 3

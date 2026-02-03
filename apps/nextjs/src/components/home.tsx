@@ -1,10 +1,9 @@
 'use client'
 
+import type { Unit, VectorGridId } from '@acme/shared'
 import React, { useMemo, useRef, useState } from 'react'
-
-import type { Unit, VectorGridId } from '@sctv/shared'
-import { convertUnit, degreesToCompass, vectorGridConfigs } from '@sctv/shared'
-import { ThemeToggle } from '@sctv/ui/theme'
+import { convertUnit, degreesToCompass, vectorGridConfigs } from '@acme/shared'
+import { ThemeToggle } from '@acme/ui/theme'
 
 import type { Vector, VectorGrid } from '~/hooks/useVectorGrid'
 import { Mapbox } from '~/components/mapbox'

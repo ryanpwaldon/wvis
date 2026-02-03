@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { Martian_Mono as FontMono } from 'next/font/google'
-
-import { cn } from '@sctv/ui'
-import { ThemeProvider } from '@sctv/ui/theme'
-import { TooltipProvider } from '@sctv/ui/tooltip'
+import { cn } from '@acme/ui'
+import { ThemeProvider } from '@acme/ui/theme'
+import { TooltipProvider } from '@acme/ui/tooltip'
 
 import '~/app/globals.css'
 

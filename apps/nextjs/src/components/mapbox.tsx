@@ -7,7 +7,7 @@ import { useTheme } from 'next-themes'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 
-import { cn } from '@sctv/ui'
+import { cn } from '@acme/ui'
 
 import { env } from '~/env'
 import { useThrottledCallback } from '~/hooks/useThrottledCallback'

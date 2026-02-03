@@ -3,7 +3,7 @@
   "extends": ["config:base"],
   "packageRules": [
     {
-      "matchPackagePatterns": ["^@sctv/"],
+      "matchPackagePatterns": ["^@acme/"],
       "enabled": false
     }
   ],
