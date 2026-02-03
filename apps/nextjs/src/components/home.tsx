@@ -1,7 +1,8 @@
 'use client'
 
-import type { Unit, VectorGridId } from '@acme/shared'
 import React, { useMemo, useRef, useState } from 'react'
+
+import type { Unit, VectorGridId } from '@acme/shared'
 import { convertUnit, degreesToCompass, vectorGridConfigs } from '@acme/shared'
 import { ThemeToggle } from '@acme/ui/theme'
 
@@ -43,7 +44,7 @@ export const Home = () => {
     <div className="h-full w-full p-4">
       <div ref={boundaryRef} className="flex h-full w-full flex-col divide-y overflow-hidden border">
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
-          <div className="flex h-full items-center border-r px-2">SCTV</div>
+          <div className="flex h-full items-center border-r px-2">WVIS</div>
           <ThemeToggle className="border-l" />
         </div>
         <Mapbox onCursorLngLatChange={setCursorLngLat}>

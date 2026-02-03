@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Martian_Mono as FontMono } from 'next/font/google'
+
 import { cn } from '@acme/ui'
 import { ThemeProvider } from '@acme/ui/theme'
 import { TooltipProvider } from '@acme/ui/tooltip'
@@ -14,8 +15,8 @@ const fontMono = FontMono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(env.VERCEL_ENV === 'production' ? 'https://sctv.com/' : 'http://localhost:3000'),
-  title: 'SCTV',
+  metadataBase: new URL(env.VERCEL_ENV === 'production' ? 'https://wvis.vercel.app/' : 'http://localhost:3000'),
+  title: 'WVIS',
   description: undefined,
 }
 

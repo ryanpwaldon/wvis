@@ -1,5 +1,5 @@
 {
-  "name": "sctv",
+  "name": "wvis",
   "private": true,
   "engines": {
     "node": ">=20.15.0"
