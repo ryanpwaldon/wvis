@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "cron": "pnpm with-env tsx ./src/index.ts",
+    "sync": "pnpm with-env tsx ./src/index.ts",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
