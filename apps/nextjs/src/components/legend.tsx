@@ -12,6 +12,7 @@ interface LegendProps {
 }
 
 export const Legend: React.FC<LegendProps> = ({ min, max, steps, colorRamp, className }) => {
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- d3's scaleLinear creates a new object each time
   const scale = useMemo(() => scaleLinear().domain([min, max]).range([0, 100]).ticks(steps), [min, max, steps])
   const url = useMemo(() => {
     const canvas = document.createElement('canvas')

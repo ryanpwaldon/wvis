@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 
 import type { Unit, VectorGridId } from '@sctv/shared'
 import { convertUnit, degreesToCompass, vectorGridConfigs } from '@sctv/shared'
@@ -22,8 +22,9 @@ export const Home = () => {
   const [cursorLngLat, setCursorLngLat] = useState<[number, number] | null>(null)
   const [vectorGridId, setVectorGridId] = useState<VectorGridId>('wind')
   const { vectorGrid, queryVectorGrid } = useVectorGrid({ vectorGridId, date })
-  const [unit, setUnit] = useState<Unit | null>(null)
-  useEffect(() => setUnit(vectorGrid?.config.units.base ?? null), [vectorGrid])
+  const defaultUnit = vectorGrid?.config.units.base ?? null
+  const [unitOverride, setUnitOverride] = useState<Unit | null>(null)
+  const unit = unitOverride ?? defaultUnit
 
   const vector = useMemo(() => queryVectorGrid(cursorLngLat), [cursorLngLat, queryVectorGrid])
   const { colorRamp } = useColorRamp({ palette: 'turbo' })
@@ -58,7 +59,7 @@ export const Home = () => {
           {vector && vectorGrid && unit && <VectorInfo vector={vector} vectorGrid={vectorGrid} unit={unit} />}
           <div className="w-full" />
           {vectorGrid && unit && (
-            <UnitSelect className="border-l" value={unit} onChange={(value) => setUnit(value as Unit)} options={[...vectorGrid.config.units.options]} />
+            <UnitSelect className="border-l" value={unit} onChange={(value) => setUnitOverride(value as Unit)} options={[...vectorGrid.config.units.options]} />
           )}
           {vectorGrid && unit && (
             <Legend

@@ -1,5 +1,5 @@
 import type { RefObject} from 'react';
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import * as Slider from '@radix-ui/react-slider'
 import { addHours, closestIndexTo, format, startOfDay } from 'date-fns'
 
@@ -9,25 +9,50 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@sctv/ui/tooltip'
 const UTC_HOUR_START = 0 // 12am UTC
 const UTC_HOUR_INTERVAL = 3
 
+const computeDates = (now: Date, max: number) => {
+  return Array(max + 1).fill(null).map((_, i) => addHours(startOfDay(now), i)) // prettier-ignore
+}
+
+const computeValidDates = (dates: Date[]) => {
+  return dates.map((date) => (new Date(date.toUTCString()).getUTCHours() % UTC_HOUR_INTERVAL === UTC_HOUR_START ? date : null))
+}
+
 interface TimelineProps {
   days: number
   onChange: (value: Date) => void
-  boundary: RefObject<HTMLDivElement>
+  boundary: RefObject<HTMLDivElement | null>
   className?: string
 }
 
 export const Timeline = ({ days, onChange, boundary, className }: TimelineProps) => {
-  const now = new Date()
   const max = days * 24
-  const dates = Array(max + 1).fill(null).map((_, i) => addHours(startOfDay(now), i)) // prettier-ignore
-  const validDates = dates.map((date) => (new Date(date.toUTCString()).getUTCHours() % UTC_HOUR_INTERVAL === UTC_HOUR_START ? date : null))
-  const clamp = (index: number) => closestDateIndex(dates[index], validDates)
-  const [index, setIndex] = useState(closestDateIndex(now, dates))
-  useEffect(() => onChange(dates[clamp(index)]!), [])
 
-  const handleIndexChange = ([index]: [number]) => {
-    setIndex(index)
-    onChange(dates[clamp(index)]!)
+  const [{ dates, validDates, initialIndex }] = useState(() => {
+    const now = new Date()
+    const datesArray = computeDates(now, max)
+    const validDatesArray = computeValidDates(datesArray)
+    const idx = closestDateIndex(now, datesArray)
+    return { dates: datesArray, validDates: validDatesArray, initialIndex: idx }
+  })
+
+  const clamp = useCallback((idx: number) => closestDateIndex(dates[idx], validDates), [dates, validDates])
+
+  const [index, setIndex] = useState(initialIndex)
+  const hasNotifiedRef = useRef(false)
+
+  useEffect(() => {
+    if (hasNotifiedRef.current) return
+    hasNotifiedRef.current = true
+    const clampedIndex = clamp(initialIndex)
+    const initialDate = dates[clampedIndex]
+    if (initialDate) onChange(initialDate)
+  }, [clamp, dates, initialIndex, onChange])
+
+  const handleIndexChange = ([newIndex]: [number]) => {
+    setIndex(newIndex)
+    const clampedIndex = clamp(newIndex)
+    const date = dates[clampedIndex]
+    if (date) onChange(date)
   }
 
   return (
@@ -51,8 +76,8 @@ export const Timeline = ({ days, onChange, boundary, className }: TimelineProps)
                 className="border bg-background p-0 text-foreground"
               >
                 <div className="flex divide-x p-0">
-                  <div className="px-2 py-1.5">{format(dates[index]!, 'EEE d')}</div>
-                  <div className="px-2 py-1.5">{format(dates[index]!, 'ha')}</div>
+                  {dates[index] && <div className="px-2 py-1.5">{format(dates[index], 'EEE d')}</div>}
+                  {dates[index] && <div className="px-2 py-1.5">{format(dates[index], 'ha')}</div>}
                 </div>
               </TooltipContent>
             </Tooltip>

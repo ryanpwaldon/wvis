@@ -34,8 +34,8 @@ export const useVectorGridData = ({ date, config }: UseVectorGridDataProps) => {
       const url = config.url(date)
 
       // Check if the data for this URL is already in the cache
-      if (cache.has(url)) {
-        const cachedData = cache.get(url)!
+      const cachedData = cache.get(url)
+      if (cachedData) {
         setVectorGrid(cachedData)
         setIsLoading(false)
         return
@@ -73,6 +73,7 @@ export const useVectorGridData = ({ date, config }: UseVectorGridDataProps) => {
 
   useEffect(() => {
     if (date) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetching requires synchronous loading state update
       setIsLoading(true)
       void loadImage(date)
     } else {
