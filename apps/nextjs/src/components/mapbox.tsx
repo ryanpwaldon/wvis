@@ -39,6 +39,9 @@ export const Mapbox = ({ className, children, onCursorLngLatChange }: MapboxProp
         container: mapContainerRef.current,
         style: mapStyle as StyleSpecification,
         accessToken: env.NEXT_PUBLIC_MAPBOX_API_KEY,
+        dragRotate: false,
+        touchPitch: false,
+        pitchWithRotate: false,
       })
       mapRef.current.on('load', () => setIsMapReady(true))
       mapRef.current.on('mousemove', (e) => throttledOnCursorLngLatChange(e.lngLat.wrap().toArray()))
