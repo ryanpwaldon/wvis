@@ -5,8 +5,6 @@ import { cn } from '@sctv/ui'
 import { ThemeProvider } from '@sctv/ui/theme'
 import { TooltipProvider } from '@sctv/ui/tooltip'
 
-import { TRPCReactProvider } from '~/trpc/react'
-
 import '~/app/globals.css'
 
 import { env } from '~/env'
@@ -34,9 +32,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     <html className="h-full w-full" lang="en" suppressHydrationWarning>
       <body className={cn('fixed left-0 top-0 h-full w-full bg-background font-mono text-xs font-light text-foreground antialiased', fontMono.variable)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <TooltipProvider>
-            <TRPCReactProvider>{props.children}</TRPCReactProvider>
-          </TooltipProvider>
+          <TooltipProvider>{props.children}</TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

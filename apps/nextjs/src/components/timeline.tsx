@@ -1,4 +1,5 @@
-import React, { RefObject, useEffect, useState } from 'react'
+import type { RefObject} from 'react';
+import React, { useEffect, useState } from 'react'
 import * as Slider from '@radix-ui/react-slider'
 import { addHours, closestIndexTo, format, startOfDay } from 'date-fns'
 
@@ -63,7 +64,7 @@ export const Timeline = ({ days, onChange, boundary, className }: TimelineProps)
   )
 }
 
-const closestDateIndex = (date: Date | undefined, dates: Array<Date | null>) => {
+const closestDateIndex = (date: Date | undefined, dates: (Date | null)[]) => {
   if (!date) throw new Error('Date is undefined.')
   const index = closestIndexTo(date, dates.map((date) => date ?? 0)) // prettier-ignore
   if (index === undefined) throw new Error('No closest index found.')

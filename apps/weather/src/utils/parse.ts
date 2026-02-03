@@ -5,7 +5,7 @@ export const parse = (text: string, variable: string) => {
   let isCapturing = false
   let min = Infinity
   let max = -Infinity
-  const values = lines.reduce((values: Array<number | null>, line) => {
+  const values = lines.reduce((values: (number | null)[], line) => {
     if (line.startsWith(variable)) {
       isCapturing = true
       return values

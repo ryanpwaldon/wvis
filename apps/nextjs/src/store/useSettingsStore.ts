@@ -1,7 +1,9 @@
-import { create, StateCreator } from 'zustand'
-import { createJSONStorage, persist, PersistOptions } from 'zustand/middleware'
+import type { StateCreator } from 'zustand';
+import { create } from 'zustand'
+import type { PersistOptions } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware'
 
-import { Unit } from '@sctv/shared'
+import type { Unit } from '@sctv/shared'
 
 // Define the shape of your state
 interface SettingsState {

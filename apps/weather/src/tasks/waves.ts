@@ -64,8 +64,8 @@ export const run = async () => {
     let maxU = -Infinity
     let minV = Infinity
     let maxV = -Infinity
-    const wavesU: Array<number | null> = []
-    const wavesV: Array<number | null> = []
+    const wavesU: (number | null)[] = []
+    const wavesV: (number | null)[] = []
     wavesDirectionHeightTuples.forEach(([direction, height]) => {
       const u = componentsToU(direction, height)
       const v = componentsToV(direction, height)

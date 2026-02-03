@@ -3,8 +3,8 @@ import { interpolateRound } from 'd3-interpolate'
 import { scaleLinear } from 'd3-scale'
 
 interface GenerateFlowFieldImageProps {
-  u: Array<number | null>
-  v: Array<number | null>
+  u: (number | null)[]
+  v: (number | null)[]
   minU: number
   maxU: number
   minV: number

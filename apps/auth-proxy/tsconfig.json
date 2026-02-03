@@ -1,4 +1,0 @@
-{
-  "extends": "@sctv/tsconfig/base.json",
-  "include": ["routes"]
-}
