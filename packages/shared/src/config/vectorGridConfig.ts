@@ -1,6 +1,6 @@
 import { CLOUDFLARE_BUCKET_URL } from '../constants'
 
-export enum ChoroplethCombinationMode {
+export enum HeatmapCombinationMode {
   Cancellation,
   Preservation,
 }
@@ -22,8 +22,8 @@ export const vectorGridConfigs = {
         { display: 'KTS', value: 'kts' },
       ],
     },
-    choropleth: {
-      combinationMode: ChoroplethCombinationMode.Cancellation,
+    heatmap: {
+      combinationMode: HeatmapCombinationMode.Cancellation,
     },
   },
   waves: {
@@ -40,8 +40,8 @@ export const vectorGridConfigs = {
         { display: 'FT', value: 'ft' },
       ],
     },
-    choropleth: {
-      combinationMode: ChoroplethCombinationMode.Preservation,
+    heatmap: {
+      combinationMode: HeatmapCombinationMode.Preservation,
     },
   },
 } as const

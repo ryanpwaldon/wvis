@@ -12,7 +12,7 @@ import { useColorRamp } from '~/hooks/useColorRamp'
 import { useVectorGrid } from '~/hooks/useVectorGrid'
 import { LayerSelect } from './layer-select'
 import { Legend } from './legend'
-import { MapboxChoroplethLayer } from './mapbox-choropleth-layer'
+import { MapboxHeatmapLayer } from './mapbox-heatmap-layer'
 import { MapboxParticleLayer } from './mapbox-particle-layer'
 import { Timeline } from './timeline'
 import { UnitSelect } from './unit-select'
@@ -48,7 +48,7 @@ export const Home = () => {
           <ThemeToggle className="border-l" />
         </div>
         <Mapbox onCursorLngLatChange={setCursorLngLat}>
-          <MapboxChoroplethLayer vectorGrid={vectorGrid} />
+          <MapboxHeatmapLayer vectorGrid={vectorGrid} />
           <MapboxParticleLayer vectorGrid={vectorGrid} />
         </Mapbox>
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">

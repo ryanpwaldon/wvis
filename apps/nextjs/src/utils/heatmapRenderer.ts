@@ -5,7 +5,7 @@ import { interpolateTurbo } from 'd3-scale-chromatic'
 import { MercatorCoordinate } from 'mapbox-gl'
 import { createBufferInfoFromArrays, createProgramInfo, createTexture, drawBufferInfo, setBuffersAndAttributes, setUniforms } from 'twgl.js'
 
-import { ChoroplethCombinationMode } from '@sctv/shared'
+import { HeatmapCombinationMode } from '@sctv/shared'
 
 import type { VectorGrid } from '~/hooks/useVectorGrid'
 
@@ -134,9 +134,9 @@ export const fs = /* glsl */ `
     float lat = lngLat.y;
     vec2 vector_grid_pos = vec2(lng / 360.0, (lat + 90.0) / 180.0);
     float magnitude;
-    if (u_vector_grid_combination_mode == ${ChoroplethCombinationMode.Cancellation}) {
+    if (u_vector_grid_combination_mode == ${HeatmapCombinationMode.Cancellation}) {
       magnitude = getMagnitudeBicubicCancellation(vector_grid_pos);
-    } else if (u_vector_grid_combination_mode == ${ChoroplethCombinationMode.Preservation}) {
+    } else if (u_vector_grid_combination_mode == ${HeatmapCombinationMode.Preservation}) {
       magnitude = getMagnitudeBicubicPreservation(vector_grid_pos);
     }
     vec4 color = texture2D(u_color_ramp, vec2(magnitude, 0.5));
@@ -144,19 +144,19 @@ export const fs = /* glsl */ `
   }
 `
 
-export class ChoroplethRenderer {
+export class HeatmapRenderer {
   private map: Map
   private gl: WebGL2RenderingContext
   private vectorGrid?: VectorGrid
   private colorRampTexture: WebGLTexture
   private vectorGridTexture: WebGLTexture
-  private choroplethDrawProgram: ProgramInfo
+  private heatmapDrawProgram: ProgramInfo
   private mapMercatorBounds: [number, number, number, number] = [0, 0, 0, 0]
 
   constructor(map: Map, gl: WebGL2RenderingContext) {
     this.map = map
     this.gl = gl
-    this.choroplethDrawProgram = createProgramInfo(this.gl, [vs, fs])
+    this.heatmapDrawProgram = createProgramInfo(this.gl, [vs, fs])
     this.vectorGridTexture = createTexture(this.gl, {
       width: 1,
       height: 1,
@@ -206,19 +206,19 @@ export class ChoroplethRenderer {
     this.gl.disable(this.gl.STENCIL_TEST)
     this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE)
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height)
-    this.gl.useProgram(this.choroplethDrawProgram.program)
-    const choroplethQuadBufferInfo = createBufferInfoFromArrays(this.gl, { a_pos: { numComponents: 2, data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]) } }) // prettier-ignore
-    setBuffersAndAttributes(this.gl, this.choroplethDrawProgram, choroplethQuadBufferInfo)
-    setUniforms(this.choroplethDrawProgram, {
+    this.gl.useProgram(this.heatmapDrawProgram.program)
+    const heatmapQuadBufferInfo = createBufferInfoFromArrays(this.gl, { a_pos: { numComponents: 2, data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]) } }) // prettier-ignore
+    setBuffersAndAttributes(this.gl, this.heatmapDrawProgram, heatmapQuadBufferInfo)
+    setUniforms(this.heatmapDrawProgram, {
       u_color_ramp: this.colorRampTexture,
       u_vector_grid: this.vectorGridTexture,
-      u_vector_grid_combination_mode: this.vectorGrid.config.choropleth.combinationMode,
+      u_vector_grid_combination_mode: this.vectorGrid.config.heatmap.combinationMode,
       u_vector_grid_res: [this.vectorGrid.image.width - 1, this.vectorGrid.image.height - 1], // subtract 1 from height/width fix (why? needs investigating)
       u_vector_grid_min_mag: [this.vectorGrid.metadata.minU, this.vectorGrid.metadata.minV],
       u_vector_grid_max_mag: [this.vectorGrid.metadata.maxU, this.vectorGrid.metadata.maxV],
       u_color_ramp_max_mag: this.vectorGrid.config.magMax,
       u_map_mercator_bounds: this.mapMercatorBounds,
     })
-    drawBufferInfo(this.gl, choroplethQuadBufferInfo)
+    drawBufferInfo(this.gl, heatmapQuadBufferInfo)
   }
 }
