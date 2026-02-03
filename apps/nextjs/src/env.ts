@@ -11,10 +11,15 @@ export const env = createEnv({
   server: {},
   client: {
     NEXT_PUBLIC_MAPBOX_API_KEY: z.string(),
+    NEXT_PUBLIC_REFERENCE_DATE: z
+      .string()
+      .optional()
+      .transform((val) => (val ? new Date(val) : undefined)),
   },
   experimental__runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_MAPBOX_API_KEY: process.env.NEXT_PUBLIC_MAPBOX_API_KEY,
+    NEXT_PUBLIC_REFERENCE_DATE: process.env.NEXT_PUBLIC_REFERENCE_DATE,
   },
   skipValidation: !!process.env.CI || process.env.npm_lifecycle_event === 'lint',
 })

@@ -5,8 +5,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@acme/ui/tooltip'
 import * as Slider from '@radix-ui/react-slider'
 import { addHours, closestIndexTo, format, startOfDay } from 'date-fns'
 
+import { env } from '~/env'
+
 const UTC_HOUR_START = 0 // 12am UTC
 const UTC_HOUR_INTERVAL = 3
+
+const getReferenceDate = () => env.NEXT_PUBLIC_REFERENCE_DATE ?? new Date()
 
 const computeDates = (now: Date, max: number) => {
   return Array(max + 1).fill(null).map((_, i) => addHours(startOfDay(now), i)) // prettier-ignore
@@ -27,7 +31,7 @@ export const Timeline = ({ days, onChange, boundary, className }: TimelineProps)
   const max = days * 24
 
   const [{ dates, validDates, initialIndex }] = useState(() => {
-    const now = new Date()
+    const now = getReferenceDate()
     const datesArray = computeDates(now, max)
     const validDatesArray = computeValidDates(datesArray)
     const idx = closestDateIndex(now, datesArray)
