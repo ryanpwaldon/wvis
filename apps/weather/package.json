@@ -19,7 +19,6 @@
     "@t3-oss/env-core": "^0.10.1",
     "d3-interpolate": "catalog:",
     "d3-scale": "catalog:",
-    "grib-ts": "github:ryanpwaldon/grib-ts",
     "ky": "catalog:",
     "tsx": "^4.17.0",
     "zod": "catalog:"
