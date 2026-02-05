@@ -1,9 +1,10 @@
-import type { VectorGridConfig, VectorGridId } from '@acme/shared'
 import type { z } from 'zod'
 import { useCallback, useEffect, useMemo } from 'react'
-import { addHours } from 'date-fns'
-import { scaleLngLat, vectorGridConfigs } from '@acme/shared'
 import { scaleLinear } from 'd3-scale'
+import { addHours } from 'date-fns'
+
+import type { VectorGridConfig, VectorGridId } from '@acme/shared'
+import { scaleLngLat, vectorGridConfigs } from '@acme/shared'
 
 import type { vectorGridMetadataSchema } from './useVectorGridData'
 import { UTC_HOUR_INTERVAL } from '~/components/timeline'

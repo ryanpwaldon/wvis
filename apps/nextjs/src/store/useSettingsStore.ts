@@ -1,8 +1,9 @@
-import type { Unit } from '@acme/shared'
 import type { StateCreator } from 'zustand'
 import type { PersistOptions } from 'zustand/middleware'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
+
+import type { Unit } from '@acme/shared'
 
 // Define the shape of your state
 interface SettingsState {

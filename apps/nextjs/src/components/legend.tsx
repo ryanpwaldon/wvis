@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
-import { cn } from '@acme/ui'
 import { scaleLinear } from 'd3-scale'
+
+import { cn } from '@acme/ui'
 
 interface LegendProps {
   min: number
