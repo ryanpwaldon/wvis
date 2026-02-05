@@ -9,6 +9,7 @@ import type { Vector, VectorGrid } from '~/hooks/useVectorGrid'
 import { Mapbox } from '~/components/mapbox'
 import { useColorRamp } from '~/hooks/useColorRamp'
 import { useVectorGrid } from '~/hooks/useVectorGrid'
+import { GithubButton } from './github-button'
 import { LayerSelect } from './layer-select'
 import { Legend } from './legend'
 import { MapboxHeatmapLayer } from './mapbox-heatmap-layer'
@@ -44,6 +45,7 @@ export const Home = () => {
       <div ref={boundaryRef} className="flex h-full w-full flex-col divide-y overflow-hidden border">
         <div className="flex h-8 w-full justify-between bg-card text-card-foreground">
           <div className="flex h-full items-center border-r px-2">WVIS</div>
+          <GithubButton className="border-l" />
         </div>
         <Mapbox onCursorLngLatChange={setCursorLngLat}>
           <MapboxHeatmapLayer vectorGrid={vectorGrid} />
