@@ -1,5 +1,3 @@
-import { CLOUDFLARE_BUCKET_URL } from '../constants'
-
 export enum HeatmapCombinationMode {
   Cancellation,
   Preservation,
@@ -15,7 +13,7 @@ export const vectorGridConfigs = {
     id: 'wind',
     title: 'Wind',
     url(date: Date) {
-      return `${CLOUDFLARE_BUCKET_URL}/${this.id}/${date.toISOString()}.png`
+      return `${process.env.NEXT_PUBLIC_CLOUDFLARE_BUCKET_URL}/${this.id}/${date.toISOString()}.png`
     },
     magMax: 25,
     units: {
@@ -36,7 +34,7 @@ export const vectorGridConfigs = {
     id: 'waves',
     title: 'Waves',
     url(date: Date) {
-      return `${CLOUDFLARE_BUCKET_URL}/${this.id}/${date.toISOString()}.png`
+      return `${process.env.NEXT_PUBLIC_CLOUDFLARE_BUCKET_URL}/${this.id}/${date.toISOString()}.png`
     },
     magMax: 8,
     units: {

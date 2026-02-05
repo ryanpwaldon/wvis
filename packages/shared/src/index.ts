@@ -1,4 +1,3 @@
-export * from './constants'
 export * from './config/vectorGridConfig'
 export * from './utils/convertSpeed'
 export * from './utils/degreesToCompass'
