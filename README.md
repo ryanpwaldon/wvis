@@ -1,10 +1,18 @@
 # WVIS
 
-The weather app (`apps/weather`) fetches NOAA GFS forecast data and generates vector field PNGs for wind and swell patterns. One PNG per 3-hour interval across a multi-day forecast period, each representing global conditions at a single point in time. These are uploaded to Cloudflare R2, where the Next.js app (`apps/nextjs`) retrieves and renders them on an interactive map with heatmap and particle shaders, upsampling each 3-hour forecast frame for higher resolution visualization.
+Particle-based weather visualisation using Mapbox and NOAA Global Forecast System (GFS) forecast data (wind/waves).
+
+The weather app `apps/weather` fetches NOAA GFS forecast data, generates vector field PNGs for wind and wave patterns, and uploads them to Cloudflare R2. The Next.js app `apps/nextjs` retrieves these PNGs and renders them on an interactive map with heatmap and particle shaders – upsampling each frame for smoother gradients and trajectories.
+
+<img src="preview.png" alt="WVIS preview" style="max-width: 512px;">
+
+## Setup
+
+Copy `.env.example` to `.env` and fill in the required values. You'll need a [Mapbox](https://www.mapbox.com/) API key and a [Cloudflare R2](https://developers.cloudflare.com/r2/) bucket with API credentials to generate and serve the weather data.
 
 ## Commands
 
 ```bash
-pnpm dev           # Start dev servers
-pnpm weather:sync  # Sync weather data to R2
+pnpm weather:sync  # Fetch/process/upload forecast data
+pnpm dev           # Serve nextjs app
 ```
